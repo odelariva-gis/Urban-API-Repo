@@ -236,7 +236,6 @@ def create_plans_from_fc(in_fc: str,
     ###Iterate through here...
     print('Complete getting your plan boundary vertices...')
    
-
     with arcpy.da.SearchCursor(in_fc, [shape_field, event_name_field,  start_date_field, end_date_field]) as cursor:
        
         for row in cursor:
@@ -350,8 +349,6 @@ def create_plans_from_fc(in_fc: str,
 
         return None
     
-
-
 def return_created_urban_design_database_id(op: schema.Mutation, json_data: HTTPEndpoint) -> str:
     '''
     
@@ -406,7 +403,7 @@ def create_multiple_plans(df: pd.core.frame.DataFrame,
         print(f'WKID: {wkid}')
         
         print('Creating coordinates for plan...')
-        coord = get_coords(plan, shape_field)
+        coord = get_coords_plan(plan, shape_field)
         
         print("Creating plan GraphQL dictionary...")
         print(f"Creating current plan name: {event_name}")
@@ -444,3 +441,55 @@ def create_endpoint(graph_url: str, _auth:str) -> HTTPEndpoint:
     '''
 
     return(HTTPEndpoint( graph_url, _auth))
+
+def create_branch_dict(urban_database_id: str,
+                       branch_name: str, 
+                       branch_order: int,
+                       urban_event_id: str
+                       ) -> List:
+
+    '''
+    Creates dictionary/GraphQL query for creation of branches...
+    '''
+
+    attributes_dict = {
+                        "BranchName": branch_name,
+                        "BranchOrder": branch_order,
+                        "Existing": "false",
+                        "UrbanEventID": urban_event_id
+                    }
+
+
+    return [attributes_dict]
+
+def create_parcel_overlay(coords: List) -> dict:
+    '''
+    Creates query for parcel overlay selection
+    '''
+
+    pre_dict = {'rings': coords, 'spatialReference': {'wkid': 102100}}
+
+    overlay_dict = {'polygon': pre_dict, 'relationship': 'Contains'}
+
+    return overlay_dict
+
+def get_parcel_list(parcel_data_op: str)-> sgqlc.operation.Operation:
+    '''
+    Will get coordinates from the returned data.
+    '''
+
+    parcel_list = []
+
+    len_parcels = len(parcel_data_op.urban_model.urban_database.parcels)
+
+    for parcel in range(len_parcels):
+        parcel_list.append(parcel_data_op.urban_model.urban_database.parcels[parcel].geometry.rings)
+
+    print('Finished getting ')
+
+
+    return parcel_list
+
+
+
+
