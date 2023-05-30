@@ -442,25 +442,40 @@ def create_endpoint(graph_url: str, _auth:str) -> HTTPEndpoint:
 
     return(HTTPEndpoint( graph_url, _auth))
 
-def create_branch_dict(urban_database_id: str,
-                       branch_name: str, 
-                       branch_order: int,
-                       urban_event_id: str
+def create_branch_dict(
+                       urban_event_id: str,
+                       owner_name: str,
                        ) -> List:
 
     '''
     Creates dictionary/GraphQL query for creation of branches...
     '''
 
-    attributes_dict = {
-                        "BranchName": branch_name,
-                        "BranchOrder": branch_order,
-                        "Existing": "false",
-                        "UrbanEventID": urban_event_id
+    attributes_existing = {
+                        "branch_name": "Existing",
+                        "branch_order": 1,
+                        "existing": True,
+                        "urban_event_id": urban_event_id,
+                        "description": "existing conditions"
                     }
+    
+    single_branch_existing = {"attributes": attributes_existing}
+
+    attributes_future = {
+                        "branch_name": "Scenario 1",
+                        "branch_order": 2, 
+                        "owner_name": owner_name, 
+                        "urban_event_id": urban_event_id, 
+                        'existing': False, 
+                        'description': 'the basic concept of the plan'
+                        }
+
+    single_branch_future = {"attributes": attributes_future}
 
 
-    return [attributes_dict]
+
+
+    return [single_branch_existing, single_branch_future]
 
 def create_parcel_overlay(coords: List) -> dict:
     '''
@@ -473,7 +488,7 @@ def create_parcel_overlay(coords: List) -> dict:
 
     return overlay_dict
 
-def get_parcel_list(parcel_data_op: str)-> sgqlc.operation.Operation:
+def get_parcel_list(parcel_data_op: str)-> List:
     '''
     Will get coordinates from the returned data.
     '''
@@ -485,11 +500,97 @@ def get_parcel_list(parcel_data_op: str)-> sgqlc.operation.Operation:
     for parcel in range(len_parcels):
         parcel_list.append(parcel_data_op.urban_model.urban_database.parcels[parcel].geometry.rings)
 
+
     print('Finished getting ')
 
 
     return parcel_list
 
+def create_add_parcel_dict(coords: List, 
+                           branch_id: str, 
+                           wkid: int,
+                           cov_max: float) -> dict:
+        
+    '''
+    Create the dictionary for the add parcel to the model
+    '''
 
 
+    geometry_dict = {'rings': coords, 'spatialReference': {'wkid': wkid} }
+
+    attribute_pre_dict = {'CoverageMax': cov_max, 'BranchID': branch_id}
+
+    attribute_dict = {'attributes': attribute_pre_dict, 'geometry': geometry_dict}
+
+    return [attribute_dict]
+
+
+def add_multiple_parcels(parcel_list: List, 
+                         urban_database_id: str,
+                         branch_id: str, 
+                         cov_max: float,
+                         wkid: int,
+                         endpoint: HTTPEndpoint) -> None:
+    
+    '''
+    Able to add multiple parcels by coord list...
+    '''
+
+    for parcel in parcel_list:
+        add_parcel_dict = create_add_parcel_dict(parcel, branch_id, wkid, cov_max)
+        
+        op_add_parcel = Operation(schema.Mutation)
+
+        create_branch = op_add_parcel.create_parcels(
+                    urban_database_id = urban_database_id,
+                    parcels = add_parcel_dict
+                    )
+        
+        print(create_branch)
+
+        print("Inject JSON into GraphQL database...")
+        json_data_parcel = endpoint(op_add_parcel)
+
+        errors = json_data_parcel.get('errors')
+        if errors:
+            print(errors)
+        else:
+            print(f'Successfully created new parcel ...')
+
+        del add_parcel_dict, op_add_parcel, create_branch, json_data_parcel
+
+def add_multiple_parcels_dict(parcel_dict: dict, 
+                         urban_database_id: str,
+                         branch_id: str, 
+                         cov_max: float,
+                         wkid: int,
+                         endpoint: HTTPEndpoint) -> None:
+    
+    '''
+    Takes dictionary created above to iterate through various dicitonary keys to take in arguments for creation of parcels...
+    '''
+
+    for key in parcel_dict.items():
+        add_parcel_dict = create_add_parcel_dict(parcel_dict[key][11], branch_id, wkid, cov_max)
+        
+        op_add_parcel = Operation(schema.Mutation)
+
+        create_branch = op_add_parcel.create_parcels(
+                    urban_database_id = urban_database_id,
+                    parcels = add_parcel_dict
+                    )
+        
+        print(create_branch)
+
+        print("Inject JSON into GraphQL database...")
+        json_data_parcel = endpoint(op_add_parcel)
+
+        errors = json_data_parcel.get('errors')
+        if errors:
+            print(errors)
+        else:
+            print(f'Successfully created new parcel ...')
+
+        del add_parcel_dict, op_add_parcel, create_branch, json_data_parcel
+    
 
