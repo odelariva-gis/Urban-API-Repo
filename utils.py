@@ -1,7 +1,7 @@
-
 '''
 Utilies for serveral commonly used workflows for GraphQL Urban API. 
 '''
+
 
 import os
 from typing import List
@@ -23,7 +23,10 @@ import pandas as pd
 
 importlib.reload(config)
 
+
+
 def funciton_timer(in_function)->str:
+
     '''
     Function wrapper to time other functions...
     '''
@@ -39,6 +42,7 @@ def funciton_timer(in_function)->str:
 
 
 def loggin_agol(config_name: str) -> GIS:
+
     '''
     Will log into AGOL for you! Must keep your 'config.py' file in the same location as your file. 
 
@@ -66,7 +70,10 @@ def loggin_agol(config_name: str) -> GIS:
 
     return source
 
+
+
 def create_token_header(config_name: str, gis_source: GIS = None) -> dict:
+
     '''
     This will function return the auth token string for GraphQL endpoint headers
     a type dict.  
@@ -101,7 +108,10 @@ def create_token_header(config_name: str, gis_source: GIS = None) -> dict:
 
     return endpoint_header
 
+
+
 def request_token(gis_source: GIS) -> str:
+
     '''
     Returns token for user as type string.
     '''
@@ -112,11 +122,15 @@ def request_token(gis_source: GIS) -> str:
         token = gis_source._con.token
     
     print('Here is your current token: ')
+
     print(token)
 
     return token
 
+
+
 def return_unix_time(in_date: datetime.date) -> float:
+
     '''
     Function returns Unix time stamp.  Take in a tuple argument. 
     '''
@@ -128,16 +142,21 @@ def return_unix_time(in_date: datetime.date) -> float:
         return math.ceil(((time.mktime(today_date.timetuple()))))
     
 
+
 def get_fc_desc(in_fc: str, ) -> geoprocessing.gp:
+
     '''
     Returns a describe objects for input feature class 
     '''
+
     desc = arcpy.Describe(in_fc)
 
     return desc.ShapeFieldName + '@', desc.SpatialReference.factoryCode
 
 
+
 def create_endpoint(graph_url: str, _auth:str) -> HTTPEndpoint:
+
     '''
     Creates endpoing for use in Urban API
     '''
@@ -145,7 +164,9 @@ def create_endpoint(graph_url: str, _auth:str) -> HTTPEndpoint:
     return(HTTPEndpoint( graph_url, _auth))
 
 
+
 def get_coords_plan(in_fc: str, shape_field:str ) -> List:
+
     '''
     Gets your coordinate from your plans input as a feature class...
     '''
@@ -173,12 +194,14 @@ def get_coords_plan(in_fc: str, shape_field:str ) -> List:
     return coord_list
 
 
+
 def get_plan_dict(coord_list: List, 
                   event_name:str, 
                   end_date: float, 
                   start_date: float, 
                   planning_method: str, 
                   wkid: str) -> List:
+    
     ''''
     Creates a list of dicitonary of coords and events and dates from the feature class.  
     '''
@@ -197,7 +220,9 @@ def get_plan_dict(coord_list: List,
     return [attributes_dict]
 
 
+
 def get_coords_parcels(in_fc: str, shape_field:str ) -> List:
+
     '''
     Gets coordinates from the feature class for plans being input.  
     '''
@@ -224,12 +249,13 @@ def get_coords_parcels(in_fc: str, shape_field:str ) -> List:
     print('Complete getting your plan boundary vertices...')
 
     return temp_coord_list
-    #return coord_list
+ 
 
 
 def get_parcel_dict(coord_list: List, 
                   custom_id:str,  
                   wkid: str) -> List:
+    
     ''''
     Creates dictionary for adding parcels...
     '''
@@ -243,6 +269,7 @@ def get_parcel_dict(coord_list: List,
     attributes_dict = {'attributes': attributes_pre_dict, 'geometry': geometry_dict}
 
     return [attributes_dict]
+
 
 
 def create_plans_from_fc(in_fc: str, 
@@ -317,8 +344,6 @@ def create_plans_from_fc(in_fc: str,
             ### Get the ID of the creation of the new urban design database
             op_database_id = op_return.create_urban_design_database
 
-            
-
             print(f'Current Urban Design Datbase ID: {op_database_id}')
 
             _e_date = return_unix_time(row[3])
@@ -342,19 +367,14 @@ def create_plans_from_fc(in_fc: str,
             op_create_plans = Operation(schema.Mutation)
 
             #urban model, urban_model_database, urban_data_model_view
-
             create_plans = op_create_plans.create_plans(
                     urban_database_id    = op_database_id,
                     plans                = plan
             )
 
-            #print('*'*50)
-            #print(create_plans)
-            
             print("Inject JSON into GraphQL database...")
             json_data_plans = endpoint(op_create_plans)
 
-            #print(json_data_plans)
             print('*'*50)
 
             errors = json_data_plans.get('errors')
@@ -366,8 +386,6 @@ def create_plans_from_fc(in_fc: str,
             op_return_plan_id = op_create_plans + json_data_plans
             created_plan_id = op_return_plan_id.create_plans[0].attributes.global_id
             print(f'Newly created {row[1]} plan has a GlobalID of {created_plan_id}...')
-
-            #global_id_list.append(created_plan_id)
 
             global_id_list[op_database_id] =  created_plan_id
             
@@ -383,10 +401,14 @@ def create_plans_from_fc(in_fc: str,
 
         return global_id_list
     
+    
+
 def return_created_urban_design_database_id(op: schema.Mutation, json_data: HTTPEndpoint) -> str:
+
     '''
     Will return the database of the created ID with the OP mutation as an argument.  
     '''
+
     ### Create new OP object ot better manage data that was created
     op_return = op + json_data
 
@@ -395,6 +417,7 @@ def return_created_urban_design_database_id(op: schema.Mutation, json_data: HTTP
     print(f'Current Urban Design Datbase ID: {op_database_id}')
 
     return op_database_id
+
 
 
 def create_branch_dict(
@@ -427,27 +450,99 @@ def create_branch_dict(
 
     single_branch_future = {"attributes": attributes_future}
 
-
-
-
     return [single_branch_existing, single_branch_future]
 
-def inject_branch()-> List:
+
+
+def inject_branch(branch_dict: dict, urban_database_id: str, endpoint: HTTPEndpoint)-> schema.Mutation:
     '''
     Output branches to iterate through, will output a list
     '''
 
+    op = Operation(schema.Mutation)
+
+    create_branch = op.create_branches(
+                    urban_database_id = urban_database_id, 
+                    branches = branch_dict
+                    )
+    
+    print('Took in branch dictionary, will add to the the endpoint now...')
+
+    print("Injecting JSON into GraphQL database...")
+
+    json_data_plans_= endpoint(op)
+
+    errors = json_data_plans_.get('errors')
+
+    if errors:
+        print(errors)
+    else:
+        print(f'Successfully created branches as a new plan for Urban Dabase ID {urban_database_id} ...')
+
+    op_return_branch = op + json_data_plans_
+
+    return op_return_branch
+
+
+
+def inject_parcels(op_return_branch: schema.Mutation, urban_id: str, owner_: str, endpoint: HTTPEndpoint, urban_model_id: str) -> None:
+
+    '''
+    Iterate through branches, create the Op to query, then itereate through urban databases to get parcel list, output will beparcel liss
+
+    '''
+
+    for branch in op_return_branch.create_branches:
+        branch_id = branch.attributes.global_id
+
+        print(f'Branch Name: {branch.attributes.branch_name}')
+        print(f'Current Branch ID: {branch_id}')
+        
+        op_query_plan = Operation(schema.Query)
+
+        query_plans = op_query_plan.urban_design_databases(owners = [owner_])
+        query_plans.owner()
+        query_plans.title()
+        query_plans.id()
+        query_plans.plans(filter = {"global_ids": [urban_id]})
+        
+        data_out = endpoint(op_query_plan)
+        data_out
+
+        op_return_geometry = op_query_plan + data_out
+
+        
+        for i in range(len(op_return_geometry.urban_design_databases)):
+            if op_return_geometry.urban_design_databases[i].plans == []:
+                pass
+            else:
+                
+                overlay_coords = op_return_geometry.urban_design_databases[i].plans[0].geometry.rings
+                geo_filter_dict = create_parcel_overlay(overlay_coords)
+                
+                op_query_parcels = Operation(schema.Query)
+                query_parcels = op_query_parcels.urban_model(urban_model_id = urban_model_id)
+                overlay_geometry = query_parcels.urban_database.parcels(geometry_filter = geo_filter_dict)
+                
+                parcel_data_out = endpoint(op_query_parcels)
+                parcel_data_out
+                
+                ### create new query object to review data of the parcles that came out, should be 83 parcels in this example
+                parcel_data_op = op_query_parcels + parcel_data_out
+                
+                ### research how to get the global id here
+                print('Getting parcel information here...')
+                
+                parcel_list = get_parcel_list(parcel_data_op)
+                
+                print(f"My number of selected parcels for current Branch ID {branch_id} is currently: {len(parcel_list)}")
+
     return None
 
-def return_geometry_data() -> List:
-    '''
-    Iterate through branches, create the Op to query, then itereate through urban databases to get parcel list, Output will beparcel list
 
-    '''
-
-    return None
 
 def create_parcel_overlay(coords: List) -> dict:
+
     '''
     Creates query for parcel overlay selection
     '''
@@ -458,7 +553,10 @@ def create_parcel_overlay(coords: List) -> dict:
 
     return overlay_dict
 
+
+
 def get_parcel_list(parcel_data_op: str)-> List:
+
     '''
     Will get coordinates from the returned data.
     '''
@@ -501,6 +599,7 @@ def create_add_parcel_dict(parcel_list: List,
     return [attribute_dict]
 
 
+
 def add_multiple_parcels(parcel_list: List, 
                          urban_database_id: str,
                          branch_id: str, 
@@ -522,7 +621,6 @@ def add_multiple_parcels(parcel_list: List,
                     parcels = add_parcel_dict
                     )
         
-        #print(create_branch)
 
         print("Injecting Parcel JSON into GraphQL database...")
         json_data_parcel = endpoint(op_add_parcel)
@@ -535,117 +633,3 @@ def add_multiple_parcels(parcel_list: List,
 
         del add_parcel_dict, op_add_parcel, create_branch, json_data_parcel
 
-# def add_multiple_parcels_dict(parcel_dict: dict, 
-#                          urban_database_id: str,
-#                          branch_id: str, 
-#                          cov_max: float,
-#                          wkid: int,
-#                          endpoint: HTTPEndpoint) -> None:
-    
-#     '''
-#     Takes dictionary created above to iterate through various dicitonary keys to take in arguments for creation of parcels...
-#     '''
-
-#     for key in parcel_dict.items():
-#         add_parcel_dict = create_add_parcel_dict(parcel_dict[key][11], branch_id, wkid, cov_max)
-        
-#         op_add_parcel = Operation(schema.Mutation)
-
-#         create_branch = op_add_parcel.create_parcels(
-#                     urban_database_id = urban_database_id,
-#                     parcels = add_parcel_dict
-#                     )
-        
-#         print(create_branch)
-
-#         print("Inject JSON into GraphQL database...")
-#         json_data_parcel = endpoint(op_add_parcel)
-
-#         errors = json_data_parcel.get('errors')
-#         if errors:
-#             print(errors)
-#         else:
-#             print(f'Successfully created new parcel ...')
-
-#         del add_parcel_dict, op_add_parcel, create_branch, json_data_parcel
-    
-    # def create_multiple_plans(df: pd.core.frame.DataFrame, 
-    #              urban_model_id: str, 
-    #              endpoint: HTTPEndpoint, 
-    #              urban_database_id: str, 
-    #              ) -> None:
-    #     '''
-    #     Tool will itereate through list of plans and intakes arguments for end and start date here...
-    #     '''
-
-    #     for index, _row in df.iterrows():
-
-    #         plan  = _row['PLAN_PATH']
-    #         event_name = _row['EVENT_NAME']
-    #         _s_date_y = _row['START_DATE_Y']
-    #         _s_date_m = _row['START_DATE_M']
-    #         _s_date_d = _row['START_DATE_D']
-    #         _e_date_y = _row['END_DATE_Y']
-    #         _e_date_m = _row['END_DATE_M']
-    #         _e_date_d = _row['END_DATE_D']
-            
-    #         _e_date = return_unix_time(_s_date_y, _s_date_m, _s_date_d)
-    #         _s_date = return_unix_time(_e_date_y, _e_date_m, _e_date_d)
-
-    #         print(f"Creating  plan for feature class: {plan}...")
-            
-    #         print("Creating shape field and WKID for plan...")
-    #         shape_field, wkid = get_fc_desc(plan)
-
-    #         print(f'Shape field: {shape_field}')
-    #         print(f'WKID: {wkid}')
-            
-    #         print('Creating coordinates for plan...')
-    #         coord = get_coords_plan(plan, shape_field)
-            
-    #         print("Creating plan GraphQL dictionary...")
-    #         print(f"Creating current plan name: {event_name}")
-    #         plans = get_plan_dict(coord, event_name, _e_date, _s_date, 'Zoning', wkid )
-            
-    #         print("Create Mutations here...")
-            
-    #         ### Create the plan here
-    #         op_create_plans = Operation(schema.Mutation)
-
-    #         #urban model, urban_model_database, urban_data_model_view
-
-    #         create_plans = op_create_plans.create_plans(
-    #             urban_database_id    = urban_database_id,
-    #             plans                = plans
-    #         )
-
-    #         print("Inject JSON into GraphQL database...")
-    #         json_data = endpoint(op_create_plans)
-    #         errors = json_data.get('errors')
-    #         if errors:
-    #             print(errors)
-    #         else:
-    #             print(f'Successfully created {event_name} as a new plan for urban model {urban_model_id} and urban design database {urban_database_id}...')
-    #         print("="*50)
-    #         print(' ')
-            
-    #     print("Completed script...")
-    #     return None
-
-# def create_add_parcel_dict(coords: List, 
-#                            branch_id: str, 
-#                            wkid: int,
-#                            cov_max: float) -> dict:
-        
-#     '''
-#     Create the dictionary for the add parcel to the model
-#     '''
-
-
-#     geometry_dict = {'rings': coords, 'spatialReference': {'wkid': wkid} }
-
-#     attribute_pre_dict = {'CoverageMax': cov_max, 'BranchID': branch_id}
-
-#     attribute_dict = {'attributes': attribute_pre_dict, 'geometry': geometry_dict}
-
-#     return [attribute_dict]
