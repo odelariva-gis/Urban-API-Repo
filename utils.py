@@ -1266,3 +1266,120 @@ def create_zone_types_from_csv(space_use_type_id: str,
 
     return None
 
+
+def check_hex(hex_str: str)-> None:
+    '''
+    check for hex code
+    '''
+    
+    match = re.search(r'^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$', hex_str)
+    
+    if match:
+        print("Hex code is valid...")
+        return True
+    else:
+        print("Hex code is NOT valid")
+        return False
+
+def check_global_id(global_id: str) -> None:
+    '''
+    check the global id
+    '''
+    match = re.search(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', global_id)
+    
+    if match:
+        print("Global ID is Valid...")
+        return True
+    else:
+        print("Global ID is NOT valid...")
+        return False
+
+def check_urban_id(urban_id: str) -> None:
+    '''
+    check the urban database id
+    '''
+    match = re.search(r'^[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}$', urban_id)
+    
+    if match:
+        print("Urban Datbase ID is Valid...")
+        return True
+    else:
+        print("Urban Database ID is NOT valid...")
+        return False
+
+
+def check_csv_upload(input_csv: str) -> None:
+    '''
+    Check inputs for the CSV file to upload 
+    '''
+
+    
+    df_upload = pd.read_excel(input_csv)
+    row_ = 1
+
+    for index, row in df_upload.iterrows():
+
+        row_entry_ = True
+
+        print(f"Checking row {row_} of the Update Zone Type Excel sheet...")
+
+        global_id               = row['GLOBAL_ID']
+        color                   = row['COLOR']
+        label                   = row['LABEL']
+        coverage_max            = row['COVERAGE MAX']
+        dwelling_units_per_area = row['DWELLING UNITS PER AREA MAX']
+        far_max                 = row['FAR MAX']
+        net_area_factor         = row['NET AREA FACTOR']
+        num_floor_max           = row['NUM FLOOR MAX']
+        zone_type_name          = row['ZONE_TYPE_NAME']
+        space_use_type          = row['SPACE_USE_TYPE']
+        space_use_distr         = row['SPACE_USE_DISTR']
+        adjancy                  = row['ADJANCY']
+        angle                   = row['ANGLE']
+        horizon_off             = int(row['HORIZON_OFF'])
+        vert_off                = int(row['VERT_OFF'])
+        front_int               = row['FRONT_INT']
+        front_street            = row['FRONT_STREET']
+        side_int                = row['SIDE_INT']
+        side_street             = row['SIDE_STREET']
+        rear_int                = row['BACK_INT']
+        rear_street             = row['BACK_STREET']
+        start_height            = row['START_HEIGHT']
+
+        ### Check Hex Code
+
+        if not check_hex(color):
+            row_entry_ = False
+
+        ### Check Global ID, global_id
+
+        if not check_global_id(global_id):
+            row_entry_ = False
+
+        ### Check Label, label
+
+        if len(label) > 19:
+            print("Label MUST be less than 20 character in length...")
+            row_entry_ = False
+
+        ###Check Space Use Type, space_use_type
+        if not check_space_use_type_id(space_use_type):
+            row_entry_ = False
+
+        ### Check Angle, Angle
+
+        if angle > 90:
+            print("Angle MUST be less than 90 degrees...")
+            row_entry_ = False
+
+        if row_entry_:
+            print(f"Your entry for row {row_} is valid!")
+        else:
+            print(f"Your entry for row {row_} is NOT VALID, please check instruction in the excel sheet!")
+        
+        print("-"*50)
+        print(" ")
+        row_ = row_ + 1
+
+    return None
+
