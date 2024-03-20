@@ -20,9 +20,11 @@ from sgqlc.operation import Operation
 from sgqlc.endpoint.http import HTTPEndpoint
 from urban_api_schema import urban_api_schema as schema
 import pandas as pd
+import re
+import openpyxl as pxl
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 importlib.reload(config)
-
 
 
 def funciton_timer(in_function)->str:
@@ -44,10 +46,11 @@ def funciton_timer(in_function)->str:
 def loggin_agol(config_name: str) -> GIS:
 
     '''
-    Will log into AGOL for you! Must keep your 'config.py' file in the same location as your file. 
+    Will log in user to AGOL or Enterprise account. Must keep your 'config.py' file in the same location as this file. 
 
-    Function return portal object of type GIS.  
+    Function will return portal object of type GIS to be used in other functions.  
     '''
+
     # Initialize/read config file
     cwd = sys.path[0]
     config_file = os.path.join(cwd, config_name)
@@ -62,7 +65,7 @@ def loggin_agol(config_name: str) -> GIS:
     pw         = config.login_dict['pw']
     portal_url = config.login_dict['portal_url']
 
-    # Login to the portal...
+    # Login to the portal or AGOL...
     print(f'Login in as {username} into {portal_url}! Plese wait...')
 
     source = GIS(portal_url, username, pw)
@@ -80,7 +83,7 @@ def create_token_header(config_name: str, gis_source: GIS = None) -> dict:
 
     User can either provide a config.py file to input the token and have the function
     create the GraphQL header, or provide a GIS source of type GIS to provide the function. 
-    This funciton will work in conjunction the function above, loggin_agol above, to provide a source
+    This funciton will work in conjunction the function above, login_agol above, to provide a source
     of type GIS. 
     '''
     
@@ -88,10 +91,10 @@ def create_token_header(config_name: str, gis_source: GIS = None) -> dict:
     cwd = sys.path[0]
     config_file = os.path.join(cwd, config_name)
     if not os.path.exists(config_file):
-        print(f"Config file not found: {config_file}")
+        print(f"Configuration file not found: {config_file}.  Please ensure youre configuration file is located in this folder and try again. Exiting now.")
         sys.exit()
     else:
-        print('Config File found and will continue!')
+        print('Configuration File found, will continue!')
 
     token = ''
 
@@ -105,6 +108,7 @@ def create_token_header(config_name: str, gis_source: GIS = None) -> dict:
     print(f'Creating your endpoint headers with token...')
     print(" ")
 
+    print("Here is your GraphQL Token:")
     endpoint_header = {'Authorization': 'Bearer ' + token}
 
     return endpoint_header
@@ -114,7 +118,8 @@ def create_token_header(config_name: str, gis_source: GIS = None) -> dict:
 def request_token(gis_source: GIS) -> str:
 
     '''
-    Returns token for user as type string.
+    Returns a simple token for user as type string from an AGOL or Enterprise account.
+    Requires a gis_source of type GIS which can be returned from one of the functions above.  
     '''
     token = ''
 
@@ -133,7 +138,9 @@ def request_token(gis_source: GIS) -> str:
 def return_unix_time(in_date: datetime.date = None) -> float:
 
     '''
-    Function returns Unix time stamp.  Take in a tuple argument. 
+    Function returns Unix time stamp.  Takes in a tuple as argument. 
+    Can be used for certain mutation arguments in the GraphQL queries that require
+    a Unix time stamp to proceed.  
     '''
 
     if in_date:
@@ -147,7 +154,7 @@ def return_unix_time(in_date: datetime.date = None) -> float:
 def get_fc_desc(in_fc: str, ) -> geoprocessing.gp:
 
     '''
-    Returns a describe objects for input feature class 
+    Returns a describe objects for input feature class.  
     '''
 
     desc = arcpy.Describe(in_fc)
@@ -159,16 +166,19 @@ def get_fc_desc(in_fc: str, ) -> geoprocessing.gp:
 def create_endpoint(graph_url: str, _auth:str) -> HTTPEndpoint:
 
     '''
-    Creates endpoing for use in Urban API
+    Creates an HTTP endpoint that is required by GraphQL queries and mutation used in Urban API
     '''
 
     print('Created Endpoint successfully...')
 
     return(HTTPEndpoint( graph_url, _auth))
 
+
+
 def create_database(urban_model_id: str, title: str, endpoint: HTTPEndpoint) -> str:
     '''
-    Creates a single urban database for the testing of projects or plans into a fresh GDB. 
+    Creates a single urban database for the testing of projects or plans into a fresh GDB to be used
+    in ArcGIS Urban's API.  
     '''
     op = Operation(schema.Mutation)
 
@@ -204,7 +214,8 @@ def create_database(urban_model_id: str, title: str, endpoint: HTTPEndpoint) -> 
 def get_coords_plan(in_fc: str, shape_field:str ) -> List:
 
     '''
-    Gets your coordinate from your plans input as a feature class...
+    Gets your coordinate from plans used in an ArcGIS Urban model as input as a feature class.
+    Returns a List of those coordinates.  
     '''
     coord_list = []
 
@@ -239,7 +250,8 @@ def get_plan_dict(coord_list: List,
                   wkid: str) -> List:
     
     ''''
-    Creates a list of dicitonary of coords and events and dates from the feature class.  
+    Creates a list of dicitonary of coords, events and dates from the feature class.  
+    To be potentially used in a GraphQL query. 
     '''
 
     geometry_dict = { 'rings': coord_list, 'spatialReference': {'wkid':wkid}}
@@ -260,7 +272,7 @@ def get_plan_dict(coord_list: List,
 def get_coords_parcels(in_fc: str, shape_field:str ) -> List:
 
     '''
-    Gets coordinates from the feature class for plans being input.  
+    Gets coordinates from the feature class for plans as a gfeatures lass input input.  
     '''
     
     with arcpy.da.SearchCursor(in_fc, [shape_field]) as cursor:
@@ -293,7 +305,7 @@ def get_parcel_dict(coord_list: List,
                   wkid: str) -> List:
     
     ''''
-    Creates dictionary for adding parcels...
+    Creates dictionary for adding parcels utilized in GraphQL Queries for use in the Urban API. 
     '''
 
     geometry_dict = { 'rings': coord_list, 'spatialReference': {'wkid':wkid}}
@@ -319,7 +331,7 @@ def create_plans_from_fc(in_fc: str,
                          endpoint: HTTPEndpoint)-> dict:
 
     '''
-    Creates initial urban design database
+    Creates initial urban design database for use in the Urban API. 
     '''
     
     ###Iterate through here...
@@ -462,7 +474,7 @@ def create_branch_dict(
                        ) -> List:
 
     '''
-    Creates dictionary/GraphQL query for creation of branches...
+    Creates dictionary/GraphQL query for creation of plan branches in the Urban API. 
     '''
 
     attributes_existing = {
@@ -492,7 +504,8 @@ def create_branch_dict(
 
 def inject_branch(branch_dict: dict, urban_database_id: str, endpoint: HTTPEndpoint)-> schema.Mutation:
     '''
-    Output branches to iterate through, will output a list
+    Outputs branches that canb e used to iterate through in order to review data, will output a list from the ouput
+    query from GraqhQL. 
     '''
 
     op = Operation(schema.Mutation)
@@ -530,7 +543,7 @@ def inject_parcels(op_return_branch: schema.Mutation,
                    wkid: int) -> None:
 
     '''
-    Iterate through branches, create the Op to query, then itereate through urban databases to get parcel list, output will beparcel liss
+    Iterate through branches, create the operation (OP) to query via GraphQL, then itereate through urban databases to get parcel list, output will be parcel list.
 
     '''
 
@@ -590,7 +603,7 @@ def inject_parcels(op_return_branch: schema.Mutation,
 def create_parcel_overlay(coords: List) -> dict:
 
     '''
-    Creates query for parcel overlay selection
+    Creates query for parcel overlay selection with argument of coordinattes as input. 
     '''
 
     pre_dict = {'rings': coords, 'spatialReference': {'wkid': 102100}}
@@ -604,7 +617,7 @@ def create_parcel_overlay(coords: List) -> dict:
 def get_parcel_list(parcel_data_op: str)-> List:
 
     '''
-    Will get coordinates from the returned data.
+    Will get coordinates from the returned data via the GraphQL operation (OP). 
     '''
 
     parcel_list = []
@@ -630,7 +643,7 @@ def create_add_parcel_dict(parcel_list: List,
                            wkid: int,) -> List:
         
     '''
-    Create the dictionary for the add parcel to the model, needs to intake 1 sigle list, will not iterate through 
+    Create the dictionary for the add parcel to the model, needs to intake one list, will not iterate through 
     the list of necessary items.  
     '''
 
@@ -689,7 +702,7 @@ def create_project_dict(coord_list: List,
                   wkid: str) -> List:
     
     ''''
-    Creates a list of dicitonary of coords and events and dates from the feature class.  
+    Creates a list of dicitonary of coords, events and dates from the feature class.  
     '''
 
     geometry_dict = { 'rings': coord_list, 'spatialReference': {'wkid':wkid}}
@@ -708,8 +721,9 @@ def create_project_dict(coord_list: List,
     return [attributes_dict]
 
 def create_project(project_dict: dict, urban_database_id: str, endpoint: HTTPEndpoint)-> schema.Mutation:
+    
     '''
-    Creates projection mutation schema...
+    Creates a project mutation query for GraphQL to create a new project in ArcGIS Urban API.  
     '''
     
     op_create_project = Operation(schema.Mutation)
@@ -752,7 +766,7 @@ def create_projects_from_fc(in_fc: str,
                        status_field: str,
                        endpoint: HTTPEndpoint)-> dict:
     """
-    This will inject projects...
+    This will inject projects into a specific plan for the GraphQL, takes a large quantity of arguments. 
     """
     
     ###Iterate through here...
@@ -856,8 +870,10 @@ def create_projects_from_fc(in_fc: str,
 
 
 def create_use_type_query(limit_: int, urban_model_id: int, endpoint: HTTPEndpoint)-> Operation:
+    
     """
-    This will create the query needed to get the Use Type values from the plans in a project.  
+    This will create the query needed to get the Use Type values from the plans in a project.
+
     """
     
     ### Create teh query here limited to plans.
@@ -868,9 +884,9 @@ def create_use_type_query(limit_: int, urban_model_id: int, endpoint: HTTPEndpoi
     use_types.plans.space_use_types.attributes.metric_parameters()
     use_types.plans.space_use_types.attributes.space_use_type_name()
     use_types.plans.attributes.event_name()
-    use_types.plans.space_use_types.attributes.metric_parameters()
-    use_types.plans.space_use_types.attributes.space_use_type_name()
-    use_types.plans.attributes.event_name()
+    # use_types.plans.space_use_types.attributes.metric_parameters()
+    # use_types.plans.space_use_types.attributes.space_use_type_name()
+    # use_types.plans.attributes.event_name()
     use_types.plans.metric_sources()
 
     data_out = endpoint(op)
@@ -879,8 +895,11 @@ def create_use_type_query(limit_: int, urban_model_id: int, endpoint: HTTPEndpoi
     return data_out
 
 def export_use_types(data_out: schema.Query, folder_path: str)->None:
+    
     '''
-    Export a CSV Per Plan with appropriate use types for each plan...
+    Export a CSV Per Plan with appropriate use types for each plan.
+    Update this via the Urban API Get Metrics. 
+    
     '''
 
     len_plans = len(data_out.urban_design_databases)
@@ -890,18 +909,19 @@ def export_use_types(data_out: schema.Query, folder_path: str)->None:
     for plan in range(len_plans):
         
         print(f"Currently on plan index: {plan}")
+        print(" ")
         
         if data_out.urban_design_databases[plan].plans == []:
-            print("NO PLAN FOUND")
+            print("No plans found...")
         elif data_out.urban_design_databases[plan].plans[0].space_use_types == []:
-            print("NO USETYPES FOUND")
+            print("No Use Type Metrics Found")
         else:
             plan_name = data_out.urban_design_databases[plan].plans[0].attributes.event_name
             output_file = plan_name + ' Metrics.csv'
             print(plan_name)
             len_sources = len(data_out.urban_design_databases[plan].plans[0].metric_sources)
             print(f"We have {len_sources} metric sources...")
-            print("-"*50)
+            print(" ")
             
             id_dict = {}
 
@@ -968,8 +988,9 @@ def export_use_types(data_out: schema.Query, folder_path: str)->None:
     
 
 def get_zone_type_count(urban_model_id: str, endpoint: HTTPEndpoint) -> str:
+    
     '''
-    Gets amount of zone types 
+    Gets amount of zone types.  
     '''
     op = Operation(schema.Query)
 
@@ -999,8 +1020,10 @@ def get_zone_type_count(urban_model_id: str, endpoint: HTTPEndpoint) -> str:
     return None
 
 def get_zone_types(urban_model_id: str, endpoint: HTTPEndpoint) -> List: 
+    
     '''
-    Get zones types and spits out a list of each Zone Type in the Urban Model ID.
+    Get zones types and returns out a list of each Zone Type in the specific Urban Model. Using 
+    GraphQL queries and Urban Model ID and endpoints.  
     '''
     query_        = True
     offset_       = 0
@@ -1022,6 +1045,7 @@ def get_zone_types(urban_model_id: str, endpoint: HTTPEndpoint) -> List:
         zone_types.attributes.coverage_max()
         zone_types.attributes.dwelling_units_per_area_max()
         zone_types.attributes.farmax()
+        zone_types.attributes.planning_method()
         zone_types.attributes.height_max()
         zone_types.attributes.net_area_factor()
         zone_types.attributes.num_floors_max()
@@ -1069,14 +1093,17 @@ def get_zone_types(urban_model_id: str, endpoint: HTTPEndpoint) -> List:
     return(use_type_list)
 
 def parse_zone_type_table(use_type_list: List) -> List:
+    
     '''
-    Parses through the zone table and outputs a csv list to be used in a Pandas dataframe.
+    Parses through the zone table and outputs a csv list to created in a Pandas dataframe.
     '''
 
     print('Preparing to iterate through CSV list...')
     print(" ")
 
     csv_list = []
+
+    ### Iterating through the CSV to get back Use Types and create a list. 
 
     for x in range(len(use_type_list)):
 
@@ -1088,12 +1115,13 @@ def parse_zone_type_table(use_type_list: List) -> List:
         temp_hold_list.append(use_type_list[x].attributes.color)
         temp_hold_list.append(use_type_list[x].attributes.label)
         temp_hold_list.append(use_type_list[x].attributes.coverage_max)
+        temp_hold_list.append(use_type_list[x].attributes.planning_method)
         temp_hold_list.append(use_type_list[x].attributes.dwelling_units_per_area_max)
         temp_hold_list.append(use_type_list[x].attributes.farmax)
         temp_hold_list.append(use_type_list[x].attributes.net_area_factor)
         temp_hold_list.append(use_type_list[x].attributes.num_floors_max)
-
         temp_hold_list.append(use_type_list[x].attributes.zone_type_name)
+
         if use_type_list[x].attributes.allowed_space_use_types == None or use_type_list[x].attributes.allowed_space_use_types == []:
             temp_hold_list.append('NO SPACE USE TYPE')
             temp_hold_list.append('NO SPACE USE TYPE')
@@ -1109,7 +1137,6 @@ def parse_zone_type_table(use_type_list: List) -> List:
             temp_hold_list.append('NO SKYPLANES FOUND')
 
         else:
-
             temp_hold_list.append(use_type_list[x].attributes.skyplanes[0].adjacency)
             temp_hold_list.append(use_type_list[x].attributes.skyplanes[0].angle)
             temp_hold_list.append(use_type_list[x].attributes.skyplanes[0].horizontal_offset)
@@ -1149,21 +1176,92 @@ def parse_zone_type_table(use_type_list: List) -> List:
         print(f"Successfuly parced through {use_type_list[x].attributes.label} Zone Type...")
         print(" ")
 
+        # elif use_type_list[x].attributes.planning_method == 'LandUse':
+
+        #     temp_hold_list.append(use_type_list[x].attributes.global_id)
+        #     temp_hold_list.append(use_type_list[x].attributes.color)
+        #     temp_hold_list.append(use_type_list[x].attributes.label)
+        #     temp_hold_list.append(use_type_list[x].attributes.coverage_max)
+        #     temp_hold_list.append()
+        #     temp_hold_list.append(use_type_list[x].attributes.dwelling_units_per_area_max)
+        #     temp_hold_list.append(use_type_list[x].attributes.farmax)
+        #     temp_hold_list.append(use_type_list[x].attributes.net_area_factor)
+        #     temp_hold_list.append(use_type_list[x].attributes.num_floors_max)
+
+        #     temp_hold_list.append(use_type_list[x].attributes.zone_type_name)
+        #     if use_type_list[x].attributes.allowed_space_use_types == None or use_type_list[x].attributes.allowed_space_use_types == []:
+        #         temp_hold_list.append('NO SPACE USE TYPE')
+        #         temp_hold_list.append('NO SPACE USE TYPE')
+
+        #     else:
+        #         temp_hold_list.append(use_type_list[x].attributes.allowed_space_use_types[0].space_use_type_id)
+        #         temp_hold_list.append(use_type_list[x].attributes.allowed_space_use_types[0].target_distribution)
+                
+        #     if use_type_list[x].attributes.skyplanes == None or use_type_list[x].attributes.skyplanes == []:
+        #         temp_hold_list.append('NO SKYPLANES FOUND')
+        #         temp_hold_list.append('NO SKYPLANES FOUND')
+        #         temp_hold_list.append('NO SKYPLANES FOUND')
+        #         temp_hold_list.append('NO SKYPLANES FOUND')
+
+        #     else:
+
+        #         temp_hold_list.append(use_type_list[x].attributes.skyplanes[0].adjacency)
+        #         temp_hold_list.append(use_type_list[x].attributes.skyplanes[0].angle)
+        #         temp_hold_list.append(use_type_list[x].attributes.skyplanes[0].horizontal_offset)
+        #         temp_hold_list.append(use_type_list[x].attributes.skyplanes[0].vertical_offset)
+
+        #     try:
+        #         temp_hold_list.append(use_type_list[x].attributes.tiers[0].setbacks.front.interior.value)
+        #     except:
+        #         temp_hold_list.append("NO VALUE")
+        #     try:
+        #         temp_hold_list.append(use_type_list[x].attributes.tiers[0].setbacks.front.street.value)
+        #     except:
+        #         temp_hold_list.append("NO VALUE")
+        #     try:
+        #         temp_hold_list.append(use_type_list[x].attributes.tiers[0].setbacks.side.interior.value)
+        #     except:
+        #         temp_hold_list.append("NO VALUE")
+        #     try:
+        #         temp_hold_list.append(use_type_list[x].attributes.tiers[0].setbacks.side.street.value)
+        #     except:
+        #         temp_hold_list.append("NO VALUE")
+        #     try:
+        #         temp_hold_list.append(use_type_list[x].attributes.tiers[0].setbacks.rear.interior.value)
+        #     except:
+        #         temp_hold_list.append("NO VALUE")
+        #     try:
+        #         temp_hold_list.append(use_type_list[x].attributes.tiers[0].setbacks.rear.street.value)
+        #     except:
+        #         temp_hold_list.append("NO VALUE")
+        #     try:
+        #         temp_hold_list.append(use_type_list[x].attributes.tiers[0].start_height)
+        #     except:
+        #         temp_hold_list.append("NO VALUE")
+            
+        #     csv_list.append(temp_hold_list)
+
+        #     print(f"Successfuly parced through {use_type_list[x].attributes.label} Zone Type...")
+        #     print(" ")
+
 
     print(f"Successfuly created a list of {len(use_type_list)} Zone Types...")
     
     return csv_list
 
 def zone_type_list_to_csv(csv_list: List, folder_path: str,  out_path_name: str ) -> None:
+    
     '''
     Createss CSV list from pandas dataframe to be reviewed by customer...
-    Headers for the dataframe are fixed...
+    Headers for the dataframe are fixed so these inputs needs to be included for the 
+    Pandas dataframe creation. 
     '''
 
     headers_ = ['GLOBAL_ID',
             'COLOR',
             'LABEL',
             'COVERAGE MAX',
+            'PLANNING METHOD',
             'DWELLING UNITS PER AREA MAX',
             'FAR MAX',
             'NET AREA FACTOR',
@@ -1185,15 +1283,20 @@ def zone_type_list_to_csv(csv_list: List, folder_path: str,  out_path_name: str 
     
     df = pd.DataFrame(csv_list, columns = headers_)
 
+    df = df.sort_values(by=["PLANNING METHOD"], ascending=True)
+
+
     output_path = os.path.join(folder_path, out_path_name)
 
     if os.path.exists(output_path):
         os.remove(output_path)
-        print(f"Deleted file: {output_path}")
+        print(f"Deleted file: {out_path_name}")
         
     df.to_csv(output_path, index = False, encoding = 'utf-8')
 
     print("Done creating CSV for your review...")
+
+    return None
    
 
 def create_zone_types_from_csv(space_use_type_id: str,
@@ -1217,7 +1320,8 @@ def create_zone_types_from_csv(space_use_type_id: str,
                                endpoint: HTTPEndpoint) -> None:
     
     '''
-    Intakes a CSV and updates the Zone Types for given Urban Model ID
+    Intakes a CSV and updates the Zone Types for given Urban Model ID and created the query for the
+    GraphQL queries.  
     '''
 
     front_ = "Front"
@@ -1268,8 +1372,10 @@ def create_zone_types_from_csv(space_use_type_id: str,
 
 
 def check_hex(hex_str: str)-> None:
+    
     '''
-    check for hex code
+    This function checks that input matches the hex code requirement for 
+    color code hex codes. 
     '''
     
     match = re.search(r'^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$', hex_str)
@@ -1282,8 +1388,10 @@ def check_hex(hex_str: str)-> None:
         return False
 
 def check_global_id(global_id: str) -> None:
+    
     '''
-    check the global id
+    This function ensure that the input argumetn matches the Global ID requirements for the ArcGIS Urban
+    API.  
     '''
     match = re.search(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', global_id)
     
@@ -1295,8 +1403,10 @@ def check_global_id(global_id: str) -> None:
         return False
 
 def check_urban_id(urban_id: str) -> None:
+    
     '''
-    check the urban database id
+    This function ensure that the input argumetn matches the Global ID requirements for the ArcGIS Urban
+    API. 
     '''
     match = re.search(r'^[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}$', urban_id)
     
@@ -1306,11 +1416,32 @@ def check_urban_id(urban_id: str) -> None:
     else:
         print("Urban Database ID is NOT valid...")
         return False
+        
+def check_space_use_type_id(space_use_id: str) -> None:
+    
+    '''
+    This function ensure that the input argumetn matches the Space Use Type requirements for the ArcGIS Urban
+    API. 
+    '''
+    if not isinstance(space_use_id, str):
+        if math.isnan(space_use_id):
+            print("Space Use Type is Empty...")
+            return False
+    else:
+    
+        match = re.search(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', space_use_id)
 
+        if match:
+            print("Space Use Type ID is Valid...")
+            return True
+        else:
+            print("Space Use Type ID is not valid...")
+            return False
 
 def check_csv_upload(input_csv: str) -> None:
+    
     '''
-    Check inputs for the CSV file to upload 
+    Ensure that the CSV to upload conforms to requirements, such as proper Hex codes and proper Global ID's. 
     '''
 
     
@@ -1383,3 +1514,572 @@ def check_csv_upload(input_csv: str) -> None:
 
     return None
 
+
+def create_metric_source_id_list(pd_list: List, unit_type: str)->List:
+    
+    '''
+    Get the function to iterate through tool to create list of properly organized items from the pandas
+    dataframe. 
+    '''
+
+    metric_source_id_list = []
+
+    for x in range(len(pd_list)):
+        space_use_name = pd_list[x][0]
+        print(f"Preparing query for {space_use_name} space use type.")
+        temp_global_id = []
+        global_id = pd_list[x][5]
+        print(f"Global ID: {global_id}")
+        print(" ")
+        segment_len = int((int(len(pd_list[x]) - 5))/6)
+
+        temp_global_id.append(global_id)
+
+        pos_1 = 10
+        pos_2 = 8
+        pos_3 = 9
+
+        temp_metric_list = []
+        print(f"Segment Length = {segment_len}")
+
+        ### TODO
+        for i in range(segment_len):
+
+            input_ = ''
+
+            if unit_type == 'Metric':
+
+                metric_source_id = pd_list[x][pos_1]
+                value = pd_list[x][pos_2]
+
+                if metric_source_id == None or value == None:
+                    pass
+                    print("pass")
+                else:
+                    print(f"Metric Source ID: {metric_source_id}")
+                    print(f"Value: {value}")
+                    print(" ")
+
+                    input_ = {'metricSourceID': metric_source_id, 'value': value}
+                    temp_metric_list.append(input_)       
+
+            elif unit_type == 'Standard':
+
+                unit_type_measure = pd_list[x][pos_3]
+
+                if unit_type_measure == 'MassPerDay':
+                    metric_source_id = pd_list[x][pos_1]
+                    value = (pd_list[x][pos_2])/2.205
+
+                elif unit_type_measure == 'VolumePerDay':
+                    metric_source_id = pd_list[x][pos_1]
+                    value = (pd_list[x][pos_2]) * 3.785
+
+                elif unit_type_measure == 'EnergyPerDay':
+                    metric_source_id = pd_list[x][pos_1]
+                    value = ((pd_list[x][pos_2])/24) * 1000
+                     #metric_value = (metric_value/24)* 1000
+
+                else:
+
+                    metric_source_id = pd_list[x][pos_1]
+                    value = pd_list[x][pos_2]
+
+                if metric_source_id == None or value == None:
+                    pass
+                    print("pass")
+                else:
+                    print(f"Metric Source ID: {metric_source_id}")
+                    print(f"Value: {value}")
+                    print(" ")
+
+                    input_ = {'metricSourceID': metric_source_id, 'value': value}
+                    temp_metric_list.append(input_)       
+
+
+
+            pos_1 = pos_1 + 6
+            pos_2 = pos_2 + 6
+            pos_3 = pos_3 + 6
+
+        temp_global_id.append(temp_metric_list)
+        metric_source_id_list.append(temp_global_id)
+
+    return metric_source_id_list
+
+
+def create_zone_type_metrics_dict(metrics_list: List)-> List:
+
+    '''
+    Intake CSV to create the GraphQL query for the creation of zone type metrics. 
+    Will output a list. 
+    
+    '''
+    
+    space_use_type_list = []
+    for metric_source in metrics_list:
+        
+        #print(metric_source)
+        
+        global_id       = metric_source[0]
+        param_list      = metric_source[1]
+        attribute_list  = {'GlobalID': global_id, 'MetricParameters': param_list}
+        
+        attributes_dict = {'attributes': attribute_list}
+        
+        space_use_types = [attributes_dict]
+        
+        space_use_type_list.append(space_use_types)
+        #print(space_use_types)
+        
+    return space_use_type_list
+
+def update_zone_types_op(space_use_types: List, urban_database_id: str, endpoint, update_zone_dict: List)-> None:
+    
+    '''
+    Create and update the zone type metrics via the GraphQL query
+    Will take as an argument list created with create_zone_type_metrics function, and database ID.
+    '''
+    
+    num_of_updates = len(update_zone_dict)
+    num_update     = 1
+    
+    for updated_zone in update_zone_dict:
+        mess_global_id = updated_zone[0]['attributes']['GlobalID']
+        len_of_metrics = len(updated_zone[0]['attributes']['MetricParameters'])
+        print(f"Updating {num_update} out of {num_of_updates} for {mess_global_id}!")
+
+        op = Operation(schema.Mutation)
+
+        update_zone_type = op.update_space_use_types(urban_database_id = urban_database_id,
+                                                     space_use_types = updated_zone)
+        json_update_zone_types = endpoint(op)
+
+        errors = json_update_zone_types.get('errors')
+
+        if errors:
+            print(errors)
+        else:
+            print(f"Successfully updated {len_of_metrics} Metrics for Use Type with Global ID: {mess_global_id}!")
+            
+        del op, update_zone_type, json_update_zone_types, errors
+        
+        num_update = num_update + 1
+        print(" ")
+    print("Successfully updated all metrics!")
+        
+    return None
+
+def create_get_zone_metric_query(urban_model_id: str, limit_: int, endpoint: HTTPEndpoint) -> schema.Query:
+    '''Get some'''
+
+    op = Operation(schema.Query)
+    use_types = op.urban_design_databases(urban_model_id = urban_model_id, limit = limit_)
+
+    use_types.plans.space_use_types.attributes.metric_parameters()
+    use_types.plans.space_use_types.attributes.space_use_type_name()
+    use_types.plans.space_use_types.attributes.label()
+    use_types.plans.space_use_types.attributes.custom_id()
+    use_types.plans.space_use_types.attributes.global_id()
+    use_types.plans.metrics()
+    use_types.plans.attributes.event_name()
+    use_types.plans.metric_sources()
+
+    data_out = endpoint(op)
+    data_out = op + data_out
+
+    return data_out
+
+def print_plan_names(data_out: schema.Query) -> None:
+    
+    '''
+    Will print and create all plan names for a database for user reviewal. 
+    '''
+
+    len_plans = len(data_out.urban_design_databases)
+
+    print(f"This geodatabase has {len_plans} plans.")
+    
+    for x in range(len(data_out.urban_design_databases)):
+        if data_out.urban_design_databases[x].plans == [] or data_out.urban_design_databases[x].plans[0].space_use_types == []:
+            print(f"Index {x}: No plan")
+            
+        else:
+            print(f"Index {x}: {data_out.urban_design_databases[x].plans[0].attributes.event_name}")
+
+
+def return_metric_dicts_lists(data_out: schema.Query) ->List:
+    
+    '''
+    Returns ID Metrics and ID dictionaries for use in GraphQL Queries from a recently queried
+    data_out Query object. 
+    '''
+
+    id_dict = {}
+    id_metric_dict = {}
+    id_dict_list = []
+    id_metric_list = []
+
+    len_plans = len(data_out.urban_design_databases)
+
+    for plan in range(len_plans):
+        print(f"Currently on plan index: {plan}")
+
+        if data_out.urban_design_databases[plan].plans == []:
+            print("No plans found...")
+        elif data_out.urban_design_databases[plan].plans[0].space_use_types == []:
+            print("No Use Type Metrics Found")
+        else:
+        
+            plan_name = data_out.urban_design_databases[plan].plans[0].attributes.event_name
+            output_file = plan_name + ' Metrics.csv'
+            
+            print(plan_name)
+            
+            len_sources = len(data_out.urban_design_databases[plan].plans[0].metric_sources)
+            print(f"We have {len_sources} metric sources...")
+            print(" ")
+
+            ### Creating id_dict from Metric Sources Global ID
+            ### Global ID of the Metric Sources -> Metric Source Id of the Use Types, who they also theyre own Global
+         
+            for x in range(len_sources):
+                temp_globalid_list = []
+                temp_metricid_list = []
+                
+                print(data_out.urban_design_databases[plan].plans[0].metric_sources[x])
+                
+                source_name = data_out.urban_design_databases[plan].plans[0].metric_sources[x].attributes.source_name
+                
+                ### Metric ID in csv
+                source_global_id = data_out.urban_design_databases[plan].plans[0].metric_sources[x].attributes.global_id
+                weight_name = data_out.urban_design_databases[plan].plans[0].metric_sources[x].attributes.weight_name
+                
+                ### metric_id will also be needed
+                ### Metric Global ID
+                metric_id = data_out.urban_design_databases[plan].plans[0].metric_sources[x].attributes.metric_id
+                source_type = data_out.urban_design_databases[plan].plans[0].metric_sources[x].attributes.source_type
+                weight_value = data_out.urban_design_databases[plan].plans[0].metric_sources[x].attributes.weight_value
+                source_type = data_out.urban_design_databases[plan].plans[0].metric_sources[x].attributes.source_type
+
+                print(f"Source Name: {source_name}")
+                print(f"Source Global ID ID: {source_global_id}")
+                print(f"weight Name: {weight_name}")
+                print(f"Metric ID: {metric_id}")
+                print(f"Source Type: {source_type}")
+                print(f"weight Value: {weight_value}")
+                print(" ")
+                
+                ###
+                ### id_dict is comprised of the metric_sources.attributes.global_id + source name and weight name
+                ### id_metric_dict is comprised of metric_sources.attributes.global_id + metric sources.attributes.metric_id
+                ###
+                
+                id_dict[source_global_id] = str(source_name) + " - " + str(weight_name)
+                id_metric_dict[source_global_id] = metric_id
+                
+                temp_globalid_list.append(source_global_id)
+                temp_globalid_list.append(str(source_name) + " - " + str(weight_name))
+                
+                temp_metricid_list.append(metric_id)
+                temp_metricid_list.append(str(source_name) + " - " + str(weight_name))
+                
+                id_dict_list.append(temp_globalid_list)
+                id_metric_list.append(temp_metricid_list)
+                
+            print(len(temp_globalid_list))
+            print(len(temp_metricid_list))
+                
+            print("*"*50)
+            
+        print(" ")
+        print("--"*50)
+
+    return id_dict, id_metric_dict, id_dict_list, id_metric_list
+
+def get_metric_use_types(data_query: schema.Query) -> dict:
+    ''' 
+    Will return a dictionary with the the space use metric types query for use in GraphQL 
+    from a data_query of type schema.Query
+    '''
+
+    len_plans = len(data_query.urban_design_databases)
+
+    type_dict = {}
+
+    for plan in range(len_plans):
+        #print(f"Currently on plan index: {plan}")
+
+        if data_query.urban_design_databases[plan].plans == []:
+            pass
+        elif data_query.urban_design_databases[plan].plans[0].space_use_types == []:
+            pass
+        else:
+            #print(data_out.urban_design_databases[plan].plans[0].metrics)
+            
+            metrics_len = len(data_query.urban_design_databases[plan].plans[0].metrics)
+            #print(metrics_len)
+            
+            for m in range(metrics_len):
+                #print(data_out.urban_design_databases[plan].plans[0].metrics[m].attributes)
+                type_unit_type= data_query.urban_design_databases[plan].plans[0].metrics[m].attributes.unit_type
+                type_global_id = data_query.urban_design_databases[plan].plans[0].metrics[m].attributes.global_id
+                
+                #print(data_out.urban_design_databases[plan].plans[0].metrics[m].attributes.urban_event_id)
+                
+                ###
+                ### type_dict is comprised of the plans.metrics.attributes.global.id + metric.attrubtes.unit_type
+                ###
+                
+                type_dict[type_global_id] = type_unit_type
+
+    print(" ")
+    print("Done creating the type dict from the metrics in plans!")
+
+    return type_dict
+
+def query_space_use_type_metrics(data_query: schema.Query, id_dict:dict, id_metric_dict: dict, type_dict: dict, unit_type: str) -> List:
+    
+    ''' 
+    Will return a list of use type metrics as a list ready to be utilized as a pandas
+    dataframe as an Excel sheet.  Take in argument of the data query of type schema.Query as well as additional
+    Dictionaries to decode Use Type Metric names.
+    '''
+
+    space_use_metric_list = []
+
+    len_plans = len(data_query.urban_design_databases)
+
+    for plan in range(len_plans):
+        upper_hold_list = []
+        len_of_mp = 0
+        
+        if data_query.urban_design_databases[plan].plans == []:
+            print(f"Plan: {plan} - No plans found...")
+            pass
+        elif data_query.urban_design_databases[plan].plans[0].space_use_types == []:
+            print(f"Plan: {plan} - No Use Type Metrics Found")
+            pass
+        else:
+            plan_name = data_query.urban_design_databases[plan].plans[0].attributes.event_name
+            print(f"Plan: {plan} - {plan_name}")
+            #temp_hold_list.append(plan_name)
+            
+            for x in range(len(data_query.urban_design_databases[plan].plans[0].space_use_types)):
+                metric_temp_hold_list = []
+                temp_hold_list = []
+                
+                #print(data_out.urban_design_databases[plan].plans[0].space_use_types[x].attributes.space_use_type_name)
+                
+                len_mp = len(data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.metric_parameters)
+                
+                space_use_name = data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.space_use_type_name
+                label = data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.label
+                custom_id = data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.custom_id
+                global_id = data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.global_id
+        
+                temp_hold_list.append(plan_name)
+                temp_hold_list.append(space_use_name)
+                temp_hold_list.append(label)
+                temp_hold_list.append(custom_id)
+                temp_hold_list.append(len_mp)
+
+                print(f"We have {len_mp} metric parameters for Use Type {space_use_name}")
+                print(" ")
+                
+                #print(len(data_out.urban_design_databases[plan].plans[0].space_use_types[x].attributes.metric_parameters))
+                for mp in range(len_mp):
+                    
+                    su_global_id     = data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.global_id
+                    metric_source_id = data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.metric_parameters[mp].metric_source_id
+                    metric_value     = data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.metric_parameters[mp].value
+                    
+
+                    if unit_type == 'Metric':
+
+                        try:
+                            if type_dict[id_metric_dict[metric_source_id]] == 'EnergyPerDay':
+                                metric_value = (metric_value/1000)* 24
+                                #metric_value = (metric_value/24)* 1000
+                                print(f"New Calculated Metric Value: {metric_value}")
+                            elif type_dict[id_metric_dict[metric_source_id]] == 'VolumePerDay':
+                                metric_value = metric_value * 1000
+                                print(f"New Calculated Metric Value: {metric_value}")
+                            else:
+                                pass
+                        except:
+                            print("No type dictionary entry found!")
+                    
+                    ### TODO
+                    elif unit_type == 'Standard':
+
+                        try:
+                            ### Kilograms Per Day to Pounds
+                            if type_dict[id_metric_dict[metric_source_id]] == 'EnergyPerDay':
+                                metric_value = (metric_value/1000)* 24
+                            elif type_dict[id_metric_dict[metric_source_id]] == 'MassPerDay':
+                                metric_value = metric_value * 2.20462
+                            ### Square Meters to Square Feet
+                            elif type_dict[id_metric_dict[metric_source_id]] == 'Area':
+                                metric_value = metric_value * 10.7639
+                            elif type_dict[id_metric_dict[metric_source_id]] == 'VolumePerDay':
+                                #metric_value = (metric_value * 1000)/.264172
+                                metric_value = (metric_value*1000) / 3.785
+                            else:
+                                pass
+                        except:
+                            print("No Type Dictionary entry found!")
+                    
+                    temp_hold_list.append(su_global_id)
+
+                    print(f"Metric ID: {metric_source_id}")
+                    print(f"Metric Value: {metric_value}")
+                    
+                    ###using plans.space_use_types.attributes.metric_parameters.metric_source_id
+                    try:
+                        print(f"ID DICT: {id_dict[metric_source_id]}")
+                        temp_hold_list.append(id_dict[metric_source_id])
+                    except:
+                        print("** NOTHING IN ID_DICT **")
+                        temp_hold_list.append(' ')
+                        
+                    try:
+                        print(f"ID METRIC DICT: {id_metric_dict[metric_source_id]}")
+                        temp_hold_list.append(id_metric_dict[metric_source_id])
+                        #metric_temp_hold_list.append(id_metric_dict[metric_source_id])
+                    except:
+                        print("** NOTHING IN METRIC_ID_DICT **")
+                        temp_hold_list.append(' ')
+                        #metric_temp_hold_list.append(' ')
+                    
+                    temp_hold_list.append(metric_value)
+                    metric_temp_hold_list.append(metric_value)
+                    
+                    try:
+                        print(f"TYPE DICT: {type_dict[id_metric_dict[metric_source_id]]}")
+                        temp_hold_list.append(type_dict[id_metric_dict[metric_source_id]])
+                        
+                    except:
+                        print("** NOTHING IN TYPE_DICT **")
+                        temp_hold_list.append(' ')
+                        
+                    temp_hold_list.append(metric_source_id)
+                    
+                    print(" ")
+
+                upper_hold_list.append(temp_hold_list)
+                print("*"*100)
+                
+            space_use_metric_list.append(upper_hold_list)
+            print(" ")
+            
+        print("=" * 100)
+            
+    return space_use_metric_list
+
+
+
+def output_excel_metric_use_types(space_use_metric_list: List, date_:str, folder_path: str)->None:
+    '''
+    Will out put the Use Type Metrics as an Excel sheet. 
+    This will create one one tab for each plan and its subsequent metrics.
+    '''
+
+    ### Iterates through the csv_list of the pandas data frames, in this case we have 5 plans
+    ### Will create the Excel sheet if it doesnt exist, then each subsequent iteration will add the tabs to the excel sheet
+
+    out_path_name = f"Urban_Use_Types_{date_}.xlsx"
+
+    output_path = os.path.join(folder_path, out_path_name)
+
+    if os.path.exists(output_path):
+        os.remove(output_path)
+        print(f"Deleted file: {out_path_name}")    
+
+    for frame_ in space_use_metric_list:
+        plan_name_ = frame_[0][0].replace("Plan: ","")
+        print(f"Creating {plan_name_} excel sheets...")
+        
+        #print(out_path_name)
+        headers_ =  ["Plan Name", "Space Use Type Name", "Label", "Custom_ID", "No. Of Metrics"]
+        headers_len_ = len(headers_)
+        index_ = 0
+        l = 0
+
+        print('Creating Excel sheet headers...')
+        for h in frame_:
+
+            len_list = len(h) - headers_len_
+            len_modulo = int(len_list/6)
+
+            index_= 0
+
+            if len_modulo > l:
+                headers_ =  ["Plan Name", "Space Use Type Name", "Label", "Custom_ID", "No. Of Metrics"]
+                headers_len_ = len(headers_)
+                for k in range(len_modulo):
+                    headers_.append(f"Space Use Type Global ID {k+1}")
+                    headers_.append(f"Source - Weight {k+1}")
+                    headers_.append(f"Metric ID {k+1}")
+                    headers_.append(f"Value {k+1}")
+                    headers_.append(f" Unit {k+1}")
+                    headers_.append(f"Metric Source ID {k+1}")
+                    index_ = index_ + 1
+                l = index_
+
+        ### Create Pandas Dataframe here
+        df = pd.DataFrame(frame_, columns = headers_)
+
+        output_path = os.path.join(folder_path, out_path_name)
+        
+        ### If the file does not exist, create the new one with the existing pandas dataframe
+        ### Then it adds the tabs for each name  
+        
+        if not os.path.exists(output_path):
+            df.to_excel(output_path, index= False, sheet_name = plan_name_, encoding = 'utf-8')
+        else:
+            excel_book = pxl.load_workbook(output_path)
+            excel_book.create_sheet(plan_name_)
+            
+            rows = dataframe_to_rows(df, index=False)
+            
+            ws = excel_book[plan_name_]
+            
+            for r_idx, row in enumerate(rows, 1):
+                # Write each cell for each column
+                for c_idx, value in enumerate(row, 1):
+                    ws.cell(row = r_idx, column = c_idx, value = value)
+                    
+            excel_book.save(output_path)
+        print(f"Finished creating the tab/excel sheets for {plan_name_}!")
+        print(" ")
+            
+    print("Completed excel creation!")          
+
+    return None
+
+
+def get_plan_space_use_names(data_query: schema.Query)-> None:
+    ''' Will get all Space Use Type names from a data query of type 
+    Schema Query.
+    '''
+
+    len_plans = len(data_query.urban_design_databases)
+
+    len_plans = len(data_query.urban_design_databases)
+
+    for plan in range(len_plans):
+        print(f"Currently on plan index: {plan}")
+        if data_query.urban_design_databases[plan].plans == []:
+            print("No plans found...")
+        elif data_query.urban_design_databases[plan].plans[0].space_use_types == []:
+            print("No Use Type Metrics Found")
+        else:
+            plan_name = data_query.urban_design_databases[plan].plans[0].attributes.event_name
+            print(f"We are on plan {plan_name}")
+            print(" ")
+            for x in range(len(data_query.urban_design_databases[plan].plans[0].space_use_types)):
+                print(data_query.urban_design_databases[plan].plans[0].space_use_types[x].attributes.space_use_type_name)
+        print("="*50)
+    
+            
