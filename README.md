@@ -17,6 +17,7 @@ within the libraries and create issues for ArcGIS Pro. Thus, we
 recommend cloning the environment so that you may keep a separate ArcGIS
 Pro Python environment for testing or work such like that with the Urban
 API.
+![A test image](images/excel_001.PNG)
 
 1.  Open you python environment by going to your ArcGIS Folder under
     your Windows Start Button
