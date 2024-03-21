@@ -9,6 +9,7 @@ schema or a library, but you may follow the same steps to make sure your
 environment is updated.
 
 ### Cloning your current Pro Environment
+![excel_001](https://github.com/odelariva-gis/Urban-API-Repo/assets/29928242/935b6af1-cf25-4925-9ba2-aaeb462007e6)
 
 Best practices indicate that you do now install Python libraries into
 your ArcGIS Pro Python environment. Doing so may create inconsistencies
