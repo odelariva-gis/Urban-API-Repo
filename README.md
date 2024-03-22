@@ -20,9 +20,7 @@ API.
 1.  Open the python environment by going ArcGIS Folder under your
     Windows Start Button:
 
-    a.  ![A screenshot of a computer Description automatically
-        generated](./image1.png){width="2.5198129921259844in"
-        height="4.921738845144357in"}
+    a.  ![Opening Command Line](images/image1.png)
 
 2.  Once this environment is opened, input the following command in the
     command line:
