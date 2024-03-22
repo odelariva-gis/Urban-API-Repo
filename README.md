@@ -30,22 +30,19 @@ API.
 > Note that this new environment can be called any name, in this case it
 > will be named 'your_api_env'.
 >
-> ![](./image2.png){width="6.5in" height="0.5770833333333333in"}
+> ![Clone Environment]images/image2.png)
 
 3.  Next, activate the environment by typing the following:
 
 [activate your_api_env]{.mark}
 
-![A screenshot of a computer Description automatically
-generated](./image3.png){width="6.5in" height="0.80625in"}
+![Activate environment](images/image3.png)
 
 4.  We will now swap to your newly created environment.
 
 [proswap your_api_env]{.mark}
 
-> ![A black and white screen with white text Description automatically
-> generated](./image4.png){width="6.5in"
-> height="0.9458333333333333in"}
+> ![Proswap Environment](images/image4.png)
 
 5.  This new environment may now be cloned and activated. Next, the
     required libraries will be installed.
@@ -60,8 +57,7 @@ these include SGQLC & OpenPyxl
 
 [pip install sgqlc]{.mark}
 
-![A screen shot of a computer Description automatically
-generated](./image5.png){width="6.5in" height="1.2in"}
+![Instal SGQLC](images/image5.png)
 
 2.  Next, download the next needed library for OpenPyxl, in the command
     line input the following line, the downloading may take a few
@@ -69,9 +65,7 @@ generated](./image5.png){width="6.5in" height="1.2in"}
 
 [pip install openpyxl]{.mark}
 
-![A screenshot of a computer Description automatically
-generated](./image6.png){width="6.5in"
-height="1.2173611111111111in"}
+![Install OPENPyxl](images/image6.png)
 
 3.  After both have downloaded, ensuring that both have successfully
     been installed is simple to do:
