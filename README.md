@@ -1,41 +1,40 @@
-# Urban API Beginning Guide 
+# Urban API -- Getting Started Guide 
 
-## Setting up your environment to utilize the Urban API
+## Setting up your environment to utilize the Urban API: Step 1
 
-You will need to follow these steps to create an environment where the
-Urban API can operate. You only need to do this one and your new python
-environment will be created. There may times where you must update the
-schema or a library, but you may follow the same steps to make sure your
-environment is updated.
+The following steps will help create a new Python environment where the
+Urban API can operate successfully. This new Python environment will
+only need to be created once. Specific libraries may need to be updated
+occasionally, but repeating the steps in certain sections will help to
+update these libraries or schemas.
 
-### Cloning your current Pro Environment
-![excel_001](https://github.com/odelariva-gis/Urban-API-Repo/assets/29928242/935b6af1-cf25-4925-9ba2-aaeb462007e6)
+### Cloning a current ArcGIS Pro Python Environment
 
-Best practices indicate that you do now install Python libraries into
-your ArcGIS Pro Python environment. Doing so may create inconsistencies
+Best practices indicate that no Python libraries be installed into the
+main ArcGIS Pro Python Environment. Doing so may create inconsistencies
 within the libraries and create issues for ArcGIS Pro. Thus, we
-recommend cloning the environment so that you may keep a separate ArcGIS
-Pro Python environment for testing or work such like that with the Urban
+recommend cloning the environment so that can be kept separate from the
+main ArcGIS Pro Python environment for testing or working with the Urban
 API.
-![A test image](images/excel_001.PNG)
 
-1.  Open you python environment by going to your ArcGIS Folder under
-    your Windows Start Button
+1.  Open the python environment by going ArcGIS Folder under your
+    Windows Start Button:
 
     a.  ![A screenshot of a computer Description automatically
         generated](./image1.png){width="2.5198129921259844in"
         height="4.921738845144357in"}
 
-2.  Once you open this environment, you will input the following command
-    in the command line: [conda create \--clone arcgispro-py3 -n
-    your_api_env]{.mark}
+2.  Once this environment is opened, input the following command in the
+    command line:
 
-> Remember that your environment can be called anything you want, in
-> this case we are simply calling it 'your_api_env'.
+    a.  [conda create \--clone arcgispro-py3 -n your_api_env]{.mark}
+
+> Note that this new environment can be called any name, in this case it
+> will be named 'your_api_env'.
 >
 > ![](./image2.png){width="6.5in" height="0.5770833333333333in"}
 
-3.  Next, we will activate the environment by typing the following:
+3.  Next, activate the environment by typing the following:
 
 [activate your_api_env]{.mark}
 
@@ -50,13 +49,13 @@ generated](./image3.png){width="6.5in" height="0.80625in"}
 > generated](./image4.png){width="6.5in"
 > height="0.9458333333333333in"}
 
-5.  Your environment has now been cloned, and active. We will now
-    proceed to download the required libraries.
+5.  This new environment may now be cloned and activated. Next, the
+    required libraries will be installed.
 
 ### Downloading Necessary Python Libraries 
 
-Next, we will be downloading specific libraries for the Urban API, these
-include SGQLC & OpenPyxl
+Next, the following downloading specific libraries for the Urban API,
+these include SGQLC & OpenPyxl
 
 1.  Using the same window that you have open from the previous steps,
     include the following command:
@@ -66,9 +65,9 @@ include SGQLC & OpenPyxl
 ![A screen shot of a computer Description automatically
 generated](./image5.png){width="6.5in" height="1.2in"}
 
-2.  Next, we will download the next needed library for OpenPyxl, in the
-    command line input the following line, the downloading may take a
-    few minutes:
+2.  Next, download the next needed library for OpenPyxl, in the command
+    line input the following line, the downloading may take a few
+    minutes:
 
 [pip install openpyxl]{.mark}
 
@@ -76,56 +75,58 @@ generated](./image5.png){width="6.5in" height="1.2in"}
 generated](./image6.png){width="6.5in"
 height="1.2173611111111111in"}
 
-3.  After both have downloaded, you can check to ensure that both have
-    successfully been installed. Do the following steps:
+3.  After both have downloaded, ensuring that both have successfully
+    been installed is simple to do:
 
     a.  In the command window, type:
 
         i.  [python]{.mark}
 
-    b.  Next, lets call both libraries to ensure they are accessible.
-        Type in the following:
+    b.  Next, both libraries will be called to ensure they are
+        accessible:
 
         i.  [import sgqlc]{.mark}
 
         ii. [import]{.mark} [openpyxl]{.mark}
 
-    c.  If no errors arise, simply type the following to exit the python
-        window:
+    c.  If no errors arise, the python window may be closed by typing:
 
         i.  [exit()]{.mark}
 
+    d.  If errors do arise, follow steps 1 and 2 in this section again
+        to ensure that the correct libraries have been downloaded.
+
 ### Downloading API Schema (if not included, or outdated) 
 
-Next we will need to download the Urban API schema, the Urban API Schema
-allows SGQLC to create the queries that Urban API requires.
+Next the Urban API schema will be downloaded. This schema allows SGQLC
+to create the queries that Urban API requires.
 
 1.  This next step will download the urban_api_schema.py into the folder
-    where you currently directory is, we change this with the following
-    command:
+    that is currently the active directory, this may be changed with the
+    following command:
 
     a.  [cd c:\\your_folder_path_here]{.mark}
 
-    b.  Now your folder path is set, and anything you download (or open)
-        will come from this folder. This will be useful when we open
-        Jupyter notebooks.
+    b.  Now the new folder path is set, and anything downloaded will
+        come from this folder. This will be useful when we open Jupyter
+        notebooks.
 
-2.  Write the following command in the same Python command window:
+2.  Write the following command when opening Python command window:
 
     a.  [sgqlc -codegen schema urban_api_schema.json
         urban_api_schema.py]{.mark}y
 
 ![](./image7.png){width="6.5in" height="0.7145833333333333in"}
 
-3.  Check your folder path and ensure that the urban_api_schema.py was
-    successfully downloaded. You should see the file in the URL that you
-    changed to in the previous steps.
+3.  Check the folder path and ensure that the urban_api_schema.py was
+    successfully downloaded. A file in the URL that was changed to in
+    the previous steps should be visible.
 
-## Setting up Folder Structure
+### Setting up Folder Structure
 
-Next, we will create our folder structure to ensure that the necessary
-files are in the right locations. Follow these steps to ensure your
-folder structure is accurate.
+Next, we will create the folder structure to ensure that the necessary
+files are in the correct locations. Follow these steps to ensure that
+the folder structure is accurate.
 
 1.  Required files will include:
 
@@ -147,10 +148,10 @@ folder structure is accurate.
 
     d.  
 
-3.  How to fill out the config.py file
+3.  How to fill out the config.py file:
 
-    a.  The config file will hold your username, password, and org URL
-        so that you don't have to input it openly into the Jupyter
+    a.  The config file will hold the username, password, and org URL so
+        that they don't have to be input openly into the Jupyter
         Notebook itself.
 
     b.  The config.py file should look like this:
@@ -159,13 +160,14 @@ folder structure is accurate.
 generated](./image8.png){width="5.228512685914261in"
 height="1.2810903324584426in"}
 
-## Setting Up Environment Before Utilizing Notebook 
+## Setting Up Environment Before Utilizing Notebook: Step 2
 
 ### Opening Python Command
 
-Open the Python command window so you can switch environments. Normally,
-opening the Python command prompt will, by default, be in the ArcGIS Pro
-environment. Opening this window is the same as the step above.
+Open the Python command window so that these environments may be
+switched. Normally, opening the Python command prompt will, by default,
+be in the ArcGIS Pro environment. Opening this window is the same as the
+step above, in Step 1.
 
 1.  Open you python environment by going to your ArcGIS Folder under
     your Windows Start Button
@@ -176,12 +178,12 @@ environment. Opening this window is the same as the step above.
 
 ### Switching Environment 
 
-Switch your active environment to access the recently created/cloned
-Urban API environment. You will need to change it by using a similar
-command to the one above. You may need to do this again if you have
-already closed out from a previous session.
+Switch the active environment to access the recently created/cloned
+Urban API environment. The environment will need to change it by using a
+similar command to the one above. This may need to done again if the
+previous session has already been closed.
 
-1.  Activate your environment with the following command:
+1.  Activate the environment with the following command:
 
     a.  [proswap your_api_env]{.mark}
 
@@ -189,49 +191,50 @@ already closed out from a previous session.
 > generated](./image4.png){width="6.5in"
 > height="0.9458333333333333in"}
 
-2.  You have no activated and switched to your recently created Python
-    environment for the Urban API.
+2.  The environment has now been activated and switched to the recently
+    created Python environment for the Urban API.
 
-### Switching to your Folder
+### Switching to Active Folder
 
 Switch to the folder that was created and structured in the previous
 section.
 
-1.  After starting the Python Command Prompt, use the following command
-    to switch your directory to your working Urban API folder (i.e.
-    wherever you located all the required files)
+1.  After starting the Python Command Prompt, the following command bay
+    be used to switch the directory to the current working Urban API
+    folder (i.e. wherever all the required files were located)
 
     a.  [cd c:\\your_folder_path_here]{.mark}
 
-2.  You have no changed directories!
+2.  The directories have now been changed.
 
 ### Starting Jupyter Notebook
 
 Start the Jupyter Notebook by calling it from the command line.
 
-1.  Since we are in the directory where your Jupyter notebooks reside,
-    you can simply call the Jupyter Notebook by using the following
-    command:
+1.  Since the current directory is where your Jupyter notebooks reside,
+    the Jupyter Notebook may be called by using the following command:
 
     a.  [jupyter notebook]{.mark}
 
-2.  From this page you can open any Jupyter Notebook for Urban API
-    workflows.
+2.  From this page any Jupyter Notebook for Urban API workflows may be
+    opened.
 
-## Utilizing Urban API Notebooks 
+## Utilizing Urban API Notebooks and ArcGIS Pro Tools: Step 3 
 
-You may use the Urban API to update your get and update your Space Use
-Metrics following the following steps.
+### Jupyter Notebook
+
+The Urban API may be used to download or update Space Use Metrics
+following the following steps.
 
 1.  Ensure that the Jupyter notebooks are in the same folder as the
-    utils.py file and the config.py file.
+    utils.py file and the config.py files.
 
 2.  Once your Jupyter Notebook opens (following steps in the previous
     step), you should see the following:
 
     a.  Urban API - Update Use Type Metrics
 
-    b.  Urban API Get Use Type Metrics
+    b.  Urban API - Get Use Type Metrics
 
 3.  Once your Jupyter opens, please open the following two notebooks:
 
@@ -242,83 +245,83 @@ Metrics following the following steps.
 4.  Open the Get Use Type Metrics and the Update Use Type Metrics
     notebook and begin running each cell.
 
-5.  Take particular note of inputting the require ID's in each cell
+5.  Take particular note of inputting the required ID's in each cell,
+    including the Urban Model ID and the Urban Database ID
 
     a.  ![](./image10.PNG){width="6.5in"
         height="0.5861111111111111in"}
 
-    b.  In this case, make sure that your Urban Model ID is updated
-        correctly before running the cell
+    b.  In this case, ensure that your Urban Model ID is updated
+        correctly before running the cell.
 
-    c.  The folder_path should also be updated correctly, this set where
-        your output excel sheets will be saved
+    c.  The folder_path should also be updated correctly, this set
+        output excel sheets will be saved.
 
 6.  For the Update Use Type Zones, ensure you have the proper Urban
-    Model ID and Urban Database ID, see below...
+    Database ID, see below...
 
     a.  ![A computer screen shot of a code Description automatically
         generated with medium
         confidence](./image11.PNG){width="5.158333333333333in"
         height="1.4031102362204724in"}
 
-    b.  Run each cell and get and update the Use Type ID's.
+    b.  Ensure that you run each cell.
 
-## Utilizing ArcGIS Pro Tools 
+### Utilizing ArcGIS Pro Tools 
 
-You may also an ArcGIS Pro Tool to achieve the same results, downloading
-your Use Type metrics, as well as updating them.
+ArcGIS Pro Tool may also be used to achieve the same results. These
+tools will allow for the downloading of the Use Type metrics in a simple
+readable Excel sheet. It may also be to update them.
 
-1.  The ArcGIS Pro Tool will have to tools within it, similar to the
-    Jupyter Notebook, there are Get Zone Type Metrics and Update Zone
-    Type Metrics
+1.  The ArcGIS Pro Tool will have the following tools: Get Zone Type
+    Metrics and Update Zone Type Metrics
 
     a.  ![A screenshot of a computer Description automatically
         generated](./image12.PNG){width="3.1086023622047243in"
         height="1.2917782152230972in"}
 
 2.  The Get Zone Type Metrics tool will have the following inputs
-    required to run
+    required to run:
 
     a.  Urban Model ID
 
     b.  Output Folder Path
 
-    c.  Select a Unit Type (Metric, Standard)
+    c.  Select a Unit Type (Metric, Standard
 
-    d.  Configuration File (Optional)
+    d.  ![](./image13.png){width="3.0002602799650044in"
+        height="2.770126859142607in"}
 
-    e.  ![A screenshot of a computer Description automatically
-        generated](./image13.PNG){width="3.0002602799650044in"
-        height="3.6586504811898513in"}
+    e.  Run the tool, and review output Excel file.
 
-    f.  Run the tool, and review output excel file.
-
-    g.  Update desired metrics and run the Update Zone Type Metrics
-        tool.
+    f.  Update desired metrics and run the Update Zone Type Metrics
+        tool. (NOTE: Please review Step 4 for updating metric Excel
+        sheets).
 
 3.  The Update Zone Type Metrics requires the following inputs:
 
     a.  Urban Database ID
 
-    b.  Excel file path with updated metrics
+    b.  Excel file path with updated metrics Excel sheet.
 
     c.  Unit type selection (metric, standard)
 
-    d.  ![A screenshot of a computer Description automatically
-        generated](./image14.PNG){width="3.0085936132983377in"
-        height="3.8253313648293963in"}
+    d.  ![](./image14.png){width="3.0085936132983377in"
+        height="2.6516415135608047in"}
 
     e.  Run the tool.
 
-## Updating the Excel Sheet
+    f.  You may now check the
+
+## Updating the Excel Sheet: Step 4
 
 We will review how to use the Excel sheet that gets downloaded, how to
-read it, how to updated it, and how to utilize it to update the Use Type
+read it, how to update it, and how to utilize it to update the Use Type
 Metrics.
 
 The output Excel sheet will have the following information:
 
--   The Name of the plan
+-   The name of the plan for those Use Types
 
 -   The Space Use Type Name
 
@@ -326,7 +329,7 @@ The output Excel sheet will have the following information:
 
 -   The Custom label of the Space Use Type
 
--   The amount of metrics for each Space Use Type
+-   The number of metrics for each Space Use Type
 
 -   The Global ID of the Space Use Type
 
@@ -336,43 +339,55 @@ The output Excel sheet will have the following information:
 
 -   The Value of the Metric
 
--   The Unit Type (number, volume, energy, etc)
+-   The Unit Type (number, volume, energy, etc.)
+
+![](./image15.png){width="6.5in" height="1.9455544619422571in"}
+
+Each Metric will have the following attributes:
+
+Global ID, Source Weight Label, Metric Global ID, Value, the Unit Type,
+the Metric Source ID. These numbers may be empty if that specific Use
+Type does not have many metrics.
+
+![](./image16.png){width="6.779434601924759in"
+height="0.30833333333333335in"}
+
+When updating the Excel sheet, you will need to do the following steps.
+
+1.  Delete the Use Types (i.e. rows in the Excel sheet) that will NOT be
+    updated, as these do not need to be updated.
 
 ![A screenshot of a computer Description automatically
-generated](./image15.PNG){width="6.5in"
-height="1.9618055555555556in"}
+generated](./image17.png){width="6.5in"
+height="2.441666666666667in"}
 
-Each Metric will have the following tabs:
+a.  NOTE: Leaving a non-updated metric will leave it as is, but the tool
+    may take slightly longer to run.
 
-Global ID, the Source Weight Label, Metric Global ID, Value, the Unit
-Type, the Metric Source ID. Ensure to check these closely.
+b.  For each row (i.e. Use Type), update any metric that needs to be
+    updated across the row. If a specific metric will not be updated,
+    they can be left as is.
 
-![A screenshot of a computer Description automatically
-generated](./image16.PNG){width="6.5in"
-height="2.377083333333333in"}
+c.  NOTE: No columns may be deleted or removed from the sheet, this may
+    cause existing metrics that will not be updated to be removed or
+    deleted.
 
-When updating the excel sheet, you will need to do the following steps.
+```{=html}
+<!-- -->
+```
+2.  A new version of the Excel sheet should be saved for each of plan,
+    after deleting each of the tabs that do not pertain to the plan that
+    is currently being updated. For example, updating the South Boston
+    Plan should have an Excel sheet that has only that tab and no other
+    plans with their updated metrics. Only one tab per sheet may be used
+    to update. ![](./image18.png){width="6.5in"
+    height="1.2770581802274716in"}
 
-1.  Delete all of the Use Types that you DO NOT want to update, you
-    don't need to include them.
+3.  Update the Value tab for each Use Type metric that needs to be
+    updated. If a specific metric does not need to be updated, it may be
+    left as in.
 
-    a.  NOTE: If you leave these included nothing will happen to that
-        metric, but the tool may take slightly longer.
-
-2.  Save a new version of the Excel sheet for each of your plans, and
-    delete each of the tabs that do not pertain to the plan that you are
-    currently updating. For example, in the sample below, you should
-    have something like South_Boston_Update.xslx, Test_Plan_Update.xslx,
-    Western_Avenue_Update.xlsx, to update each metric in each plan.
-
-![A screenshot of a computer Description automatically
-generated](./image17.PNG){width="6.5in"
-height="3.040277777777778in"}
-
-3.  Update the Value tab for each Use Type metric you want to update. If
-    you don't need to update a specific metric, simply leave it alone.
-
-![](./image16.PNG){width="6.5in" height="2.377083333333333in"}
+![](./image19.png){width="6.5in" height="0.5213112423447069in"}
 
 4.  Save the Excel sheet. It is now ready to be used the Update Zone
     Type Metrics tool in either the Jupyter Notebook or the ArcGIS Pro
