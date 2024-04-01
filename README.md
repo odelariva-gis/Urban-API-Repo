@@ -108,7 +108,7 @@ to create the queries that Urban API requires.
     a.  [sgqlc -codegen schema urban_api_schema.json
         urban_api_schema.py]{.mark}y
 
-![](./image7.png){width="6.5in" height="0.7145833333333333in"}
+![Install API Schema](images/image7.png)
 
 3.  Check the folder path and ensure that the urban_api_schema.py was
     successfully downloaded. A file in the URL that was changed to in
@@ -132,13 +132,8 @@ the folder structure is accurate.
 
 2.  Jupyter Notebooks
 
-    a.  Notebook 1
-
-    b.  Notebook 2
-
-    c.  Notebook 3
-
-    d.  
+    a.  Get Use Type Metrics
+    b.  Update Use Type Metrics
 
 3.  How to fill out the config.py file:
 
@@ -148,9 +143,7 @@ the folder structure is accurate.
 
     b.  The config.py file should look like this:
 
-![A computer screen with text and symbols Description automatically
-generated](./image8.png){width="5.228512685914261in"
-height="1.2810903324584426in"}
+![Config File](images/image8.png)
 
 ## Setting Up Environment Before Utilizing Notebook: Step 2
 
@@ -165,8 +158,7 @@ step above, in Step 1.
     your Windows Start Button
 
     a.  ![A screenshot of a computer Description automatically
-        generated](./image1.png){width="2.5198129921259844in"
-        height="4.921738845144357in"}
+        generated](images/image9.png)
 
 ### Switching Environment 
 
@@ -179,9 +171,7 @@ previous session has already been closed.
 
     a.  [proswap your_api_env]{.mark}
 
-> ![A black and white screen with white text Description automatically
-> generated](./image4.png){width="6.5in"
-> height="0.9458333333333333in"}
+> ![Swapping API](images/image10.png)
 
 2.  The environment has now been activated and switched to the recently
     created Python environment for the Urban API.
@@ -230,9 +220,7 @@ following the following steps.
 
 3.  Once your Jupyter opens, please open the following two notebooks:
 
-    a.  ![A screenshot of a web page Description automatically
-        generated](./image9.PNG){width="5.391666666666667in"
-        height="0.8499715660542432in"}
+    a.  ![Opening Jupyter](images/image11.png)
 
 4.  Open the Get Use Type Metrics and the Update Use Type Metrics
     notebook and begin running each cell.
@@ -240,8 +228,7 @@ following the following steps.
 5.  Take particular note of inputting the required ID's in each cell,
     including the Urban Model ID and the Urban Database ID
 
-    a.  ![](./image10.PNG){width="6.5in"
-        height="0.5861111111111111in"}
+    a.  ![Include ID of Jupyter Notebook](images/image12.png)
 
     b.  In this case, ensure that your Urban Model ID is updated
         correctly before running the cell.
@@ -252,10 +239,7 @@ following the following steps.
 6.  For the Update Use Type Zones, ensure you have the proper Urban
     Database ID, see below...
 
-    a.  ![A computer screen shot of a code Description automatically
-        generated with medium
-        confidence](./image11.PNG){width="5.158333333333333in"
-        height="1.4031102362204724in"}
+    a.  ![Update Zone Types](images/image13.png)
 
     b.  Ensure that you run each cell.
 
