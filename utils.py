@@ -1555,7 +1555,13 @@ def create_metric_source_id_list(pd_list: List, unit_type: str)->List:
 
                 if metric_source_id == None or value == None:
                     pass
-                    print("pass")
+                    #print("pass")
+            
+                elif unit_type_measure == 'VolumePerDay':
+                        metric_source_id = pd_list[x][pos_1]
+                        value = (pd_list[x][pos_2])/1000
+                        print(f"VolumePerDay Updated: {value}")
+                     
                 else:
                     print(f"Metric Source ID: {metric_source_id}")
                     print(f"Value: {value}")
@@ -1574,7 +1580,9 @@ def create_metric_source_id_list(pd_list: List, unit_type: str)->List:
 
                 elif unit_type_measure == 'VolumePerDay':
                     metric_source_id = pd_list[x][pos_1]
-                    value = (pd_list[x][pos_2]) * 3.785
+                    value = ((pd_list[x][pos_2]) * 3.785)/1000
+                    print(f"VolumePerDay Updated: {value}")
+                    print("******")
 
                 elif unit_type_measure == 'EnergyPerDay':
                     metric_source_id = pd_list[x][pos_1]
@@ -1588,7 +1596,7 @@ def create_metric_source_id_list(pd_list: List, unit_type: str)->List:
 
                 if metric_source_id == None or value == None:
                     pass
-                    print("pass")
+                    #print("")
                 else:
                     print(f"Metric Source ID: {metric_source_id}")
                     print(f"Value: {value}")
