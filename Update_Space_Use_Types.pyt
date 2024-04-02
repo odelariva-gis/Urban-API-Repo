@@ -140,7 +140,7 @@ class GetZoneTypes(object):
         endpoint = utils_pro.create_endpoint(graph_url, _auth)
 
         ### Query the data here from the GraphQL API...
-        data_out = utils_pro.create_get_zone_metric_query(urban_model_id, 100, endpoint)
+        data_out = utils_pro.create_get_space_use_metric_query(urban_model_id, 100, endpoint)
 
         ### Create dicts and lists here...
         id_dict, id_metric_dict, id_dict_list, id_metric_list = utils_pro.return_metric_dicts_lists(data_out)
