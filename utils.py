@@ -1019,6 +1019,7 @@ def get_zone_type_count(urban_model_id: str, endpoint: HTTPEndpoint) -> str:
 
     return None
 
+### TODO change this name 
 def get_zone_types(urban_model_id: str, endpoint: HTTPEndpoint) -> List: 
     
     '''
@@ -1670,7 +1671,7 @@ def update_zone_types_op(space_use_types: List, urban_database_id: str, endpoint
         
     return None
 
-def create_get_zone_metric_query(urban_model_id: str, limit_: int, endpoint: HTTPEndpoint) -> schema.Query:
+def create_get_space_use_metric_query(urban_model_id: str, limit_: int, endpoint: HTTPEndpoint) -> schema.Query:
     '''Get some'''
 
     op = Operation(schema.Query)
@@ -2060,8 +2061,8 @@ def output_excel_metric_use_types(space_use_metric_list: List, date_:str, folder
 
 
 def get_plan_space_use_names(data_query: schema.Query)-> None:
-    ''' Will get all Space Use Type names from a data query of type 
-    Schema Query.
+    ''' Will out put the Use Type Metrics as an Excel sheet. 
+    This will create one one tab for each plan and its subsequent metrics.
     '''
 
     len_plans = len(data_query.urban_design_databases)

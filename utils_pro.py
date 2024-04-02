@@ -1670,7 +1670,7 @@ def update_zone_types_op(space_use_types: List, urban_database_id: str, endpoint
         
     return None
 
-def create_get_zone_metric_query(urban_model_id: str, limit_: int, endpoint: HTTPEndpoint) -> schema.Query:
+def create_get_space_use_metric_query(urban_model_id: str, limit_: int, endpoint: HTTPEndpoint) -> schema.Query:
     '''Get some'''
 
     op = Operation(schema.Query)
