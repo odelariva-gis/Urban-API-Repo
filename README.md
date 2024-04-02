@@ -147,7 +147,7 @@ the folder structure is accurate.
 
 ## Setting Up Environment Before Utilizing Notebook: Step 2
 
-### Opening Python Command
+### Opening Python Command Prompt
 
 Open the Python command window so that these environments may be
 switched. Normally, opening the Python command prompt will, by default,
@@ -158,7 +158,7 @@ step above, in Step 1.
     your Windows Start Button
 
     a.  ![A screenshot of a computer Description automatically
-        generated](images/image9.png)
+        generated](images/image1.png)
 
 ### Switching Environment 
 
@@ -171,7 +171,7 @@ previous session has already been closed.
 
     a.  [proswap your_api_env]{.mark}
 
-> ![Swapping API](images/image10.png)
+> ![Swapping API](images/image4.png)
 
 2.  The environment has now been activated and switched to the recently
     created Python environment for the Urban API.
@@ -220,7 +220,7 @@ following the following steps.
 
 3.  Once your Jupyter opens, please open the following two notebooks:
 
-    a.  ![Opening Jupyter](images/image11.png)
+    a.  ![Opening Jupyter](images/image9.PNG)
 
 4.  Open the Get Use Type Metrics and the Update Use Type Metrics
     notebook and begin running each cell.
@@ -228,7 +228,7 @@ following the following steps.
 5.  Take particular note of inputting the required ID's in each cell,
     including the Urban Model ID and the Urban Database ID
 
-    a.  ![Include ID of Jupyter Notebook](images/image12.png)
+    a.  ![Include ID of Jupyter Notebook](images/image10.PNG)
 
     b.  In this case, ensure that your Urban Model ID is updated
         correctly before running the cell.
@@ -239,7 +239,7 @@ following the following steps.
 6.  For the Update Use Type Zones, ensure you have the proper Urban
     Database ID, see below...
 
-    a.  ![Update Zone Types](images/image13.png)
+    a.  ![Update Zone Types](images/image11.PNG)
 
     b.  Ensure that you run each cell.
 
@@ -252,9 +252,7 @@ readable Excel sheet. It may also be to update them.
 1.  The ArcGIS Pro Tool will have the following tools: Get Zone Type
     Metrics and Update Zone Type Metrics
 
-    a.  ![A screenshot of a computer Description automatically
-        generated](./image12.PNG){width="3.1086023622047243in"
-        height="1.2917782152230972in"}
+    a.  ![Pro Toolbox](images/image12.PNG)
 
 2.  The Get Zone Type Metrics tool will have the following inputs
     required to run:
@@ -265,8 +263,7 @@ readable Excel sheet. It may also be to update them.
 
     c.  Select a Unit Type (Metric, Standard
 
-    d.  ![](./image13.png){width="3.0002602799650044in"
-        height="2.770126859142607in"}
+    d.  ![Get Space Use Type Metrics Image](images/image13.png)
 
     e.  Run the tool, and review output Excel file.
 
@@ -282,8 +279,7 @@ readable Excel sheet. It may also be to update them.
 
     c.  Unit type selection (metric, standard)
 
-    d.  ![](./image14.png){width="3.0085936132983377in"
-        height="2.6516415135608047in"}
+    d.  ![Update Space Use Type Metrics Image](images/image14.png)
 
     e.  Run the tool.
 
@@ -317,25 +313,22 @@ The output Excel sheet will have the following information:
 
 -   The Unit Type (number, volume, energy, etc.)
 
-![](./image15.png){width="6.5in" height="1.9455544619422571in"}
+![First Download](images/image15.png)
 
 Each Metric will have the following attributes:
 
 Global ID, Source Weight Label, Metric Global ID, Value, the Unit Type,
 the Metric Source ID. These numbers may be empty if that specific Use
-Type does not have many metrics.
+Type does not have many metrics. NOTE: 
 
-![](./image16.png){width="6.779434601924759in"
-height="0.30833333333333335in"}
+![Headers](images/image16.png)
 
 When updating the Excel sheet, you will need to do the following steps.
 
 1.  Delete the Use Types (i.e. rows in the Excel sheet) that will NOT be
     updated, as these do not need to be updated.
 
-![A screenshot of a computer Description automatically
-generated](./image17.png){width="6.5in"
-height="2.441666666666667in"}
+![Delete rows](images/image17.png)
 
 a.  NOTE: Leaving a non-updated metric will leave it as is, but the tool
     may take slightly longer to run.
@@ -348,22 +341,20 @@ c.  NOTE: No columns may be deleted or removed from the sheet, this may
     cause existing metrics that will not be updated to be removed or
     deleted.
 
-```{=html}
-<!-- -->
-```
 2.  A new version of the Excel sheet should be saved for each of plan,
     after deleting each of the tabs that do not pertain to the plan that
     is currently being updated. For example, updating the South Boston
     Plan should have an Excel sheet that has only that tab and no other
     plans with their updated metrics. Only one tab per sheet may be used
-    to update. ![](./image18.png){width="6.5in"
-    height="1.2770581802274716in"}
+    to update.
 
-3.  Update the Value tab for each Use Type metric that needs to be
+    ![Headers](images/image18.png)
+
+4.  Update the Value tab for each Use Type metric that needs to be
     updated. If a specific metric does not need to be updated, it may be
     left as in.
 
-![](./image19.png){width="6.5in" height="0.5213112423447069in"}
+![Update Values](images/image19.png)
 
 4.  Save the Excel sheet. It is now ready to be used the Update Zone
     Type Metrics tool in either the Jupyter Notebook or the ArcGIS Pro
