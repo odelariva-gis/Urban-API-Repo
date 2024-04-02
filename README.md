@@ -25,24 +25,24 @@ API.
 2.  Once this environment is opened, input the following command in the
     command line:
 
-    a.  [conda create \--clone arcgispro-py3 -n your_api_env]{.mark}
+    >conda create \--clone arcgispro-py3 -n your_api_env'
 
-> Note that this new environment can be called any name, in this case it
-> will be named 'your_api_env'.
->
-> ![Clone Environment]images/image2.png)
+Note that this new environment can be called any name, in this case it
+will be named 'your_api_env'.
+
+![Activate environment](images/image2.png)
 
 3.  Next, activate the environment by typing the following:
 
-[activate your_api_env]{.mark}
+>activate your_api_env
 
 ![Activate environment](images/image3.png)
 
 4.  We will now swap to your newly created environment.
 
-[proswap your_api_env]{.mark}
+>proswap your_api_env
 
-> ![Proswap Environment](images/image4.png)
+ ![Proswap Environment](images/image4.png)
 
 5.  This new environment may now be cloned and activated. Next, the
     required libraries will be installed.
@@ -55,7 +55,7 @@ these include SGQLC & OpenPyxl
 1.  Using the same window that you have open from the previous steps,
     include the following command:
 
-[pip install sgqlc]{.mark}
+>pip install sgqlc
 
 ![Instal SGQLC](images/image5.png)
 
@@ -63,30 +63,30 @@ these include SGQLC & OpenPyxl
     line input the following line, the downloading may take a few
     minutes:
 
-[pip install openpyxl]{.mark}
+>pip install openpyxl
 
 ![Install OPENPyxl](images/image6.png)
 
 3.  After both have downloaded, ensuring that both have successfully
     been installed is simple to do:
 
-    a.  In the command window, type:
+    In the command window, type:
 
-        i.  [python]{.mark}
+        >python
 
-    b.  Next, both libraries will be called to ensure they are
-        accessible:
+    Next, both libraries will be called to ensure they are
+    accessible:
 
-        i.  [import sgqlc]{.mark}
+    >import sgqlc
 
-        ii. [import]{.mark} [openpyxl]{.mark}
+    >import openpyxl
 
-    c.  If no errors arise, the python window may be closed by typing:
+    If no errors arise, the python window may be closed by typing:
 
-        i.  [exit()]{.mark}
+     >exit()
 
-    d.  If errors do arise, follow steps 1 and 2 in this section again
-        to ensure that the correct libraries have been downloaded.
+    If errors do arise, follow steps 1 and 2 in this section again
+    to ensure that the correct libraries have been downloaded.
 
 ### Downloading API Schema (if not included, or outdated) 
 
@@ -97,16 +97,15 @@ to create the queries that Urban API requires.
     that is currently the active directory, this may be changed with the
     following command:
 
-    a.  [cd c:\\your_folder_path_here]{.mark}
+    >cd c:\\your_folder_path_here
 
-    b.  Now the new folder path is set, and anything downloaded will
+    a.  Now the new folder path is set, and anything downloaded will
         come from this folder. This will be useful when we open Jupyter
         notebooks.
 
 2.  Write the following command when opening Python command window:
 
-    a.  [sgqlc -codegen schema urban_api_schema.json
-        urban_api_schema.py]{.mark}y
+    >sgqlc -codegen schema urban_api_schema.json urban_api_schema.py
 
 ![Install API Schema](images/image7.png)
 
@@ -157,8 +156,7 @@ step above, in Step 1.
 1.  Open you python environment by going to your ArcGIS Folder under
     your Windows Start Button
 
-    a.  ![A screenshot of a computer Description automatically
-        generated](images/image1.png)
+    a.  ![Open Python Command Prompt](images/image1.png)
 
 ### Switching Environment 
 
@@ -169,9 +167,9 @@ previous session has already been closed.
 
 1.  Activate the environment with the following command:
 
-    a.  [proswap your_api_env]{.mark}
+    >proswap your_api_env
 
-> ![Swapping API](images/image4.png)
+    ![Swapping API](images/image4.png)
 
 2.  The environment has now been activated and switched to the recently
     created Python environment for the Urban API.
@@ -185,7 +183,7 @@ section.
     be used to switch the directory to the current working Urban API
     folder (i.e. wherever all the required files were located)
 
-    a.  [cd c:\\your_folder_path_here]{.mark}
+    >cd c:\\your_folder_path_here
 
 2.  The directories have now been changed.
 
@@ -196,7 +194,7 @@ Start the Jupyter Notebook by calling it from the command line.
 1.  Since the current directory is where your Jupyter notebooks reside,
     the Jupyter Notebook may be called by using the following command:
 
-    a.  [jupyter notebook]{.mark}
+    >jupyter notebook
 
 2.  From this page any Jupyter Notebook for Urban API workflows may be
     opened.
